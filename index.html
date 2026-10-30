@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b090c">
+<title>Minhas Despesas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b090c; --panel:#121013; --panel-2:#19151a; --line:#2c252d; --line-2:#3d343f;
+  --text:#f3edf2; --muted:#9a8f99; --accent:#e3a9cf; --accent-2:#a8728f;
+  --plum:#5b3a50; --green:#5fd38d; --green-bg:rgba(95,211,141,.10); --red:#ff7a8a; --red-bg:rgba(255,122,138,.10);
+  --radius:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Outfit',system-ui,sans-serif;color:var(--text);
+  background:radial-gradient(1200px 700px at 70% -10%,#3a2433 0%,transparent 60%),
+             radial-gradient(900px 600px at -10% 110%,#2a1a26 0%,transparent 60%),var(--bg);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+svg:not(.chart){width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.hidden{display:none!important}
+.muted{color:var(--muted);font-size:.9rem}
+.accent{color:var(--accent)}
+.glass{
+  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);
+}
+
+/* Botões / pills */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:999px;border:1px solid var(--line-2);transition:.2s;white-space:nowrap;font-size:.95rem}
+.btn:hover{border-color:var(--accent-2);background:rgba(227,169,207,.06)}
+.btn-primary{border:0;background:linear-gradient(135deg,#c98bb3,#8c5a7a);color:#fff;box-shadow:0 8px 30px -10px rgba(201,139,179,.6)}
+.btn-primary:hover{filter:brightness(1.1);background:linear-gradient(135deg,#c98bb3,#8c5a7a)}
+.btn-green{border:0;background:var(--green-bg);color:var(--green)}
+.btn-green:hover{background:rgba(95,211,141,.18)}
+.btn-danger{color:var(--red);border-color:rgba(255,122,138,.35)}
+.btn-danger:hover{background:var(--red-bg);border-color:var(--red)}
+.btn-block{width:100%}
+.btn-sm{padding:6px 14px;font-size:.85rem}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent-2);color:var(--accent)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:7px 16px;border-radius:999px;border:1px solid var(--line-2);font-size:.85rem;transition:.2s}
+.pill:hover{border-color:var(--accent-2)}
+.pill.active{background:linear-gradient(90deg,#7a4d6a,#3d2836);border-color:transparent}
+
+/* Login */
+.login{min-height:100%;display:grid;place-items:center;padding:16px}
+.login-card{width:100%;max-width:400px;padding:36px 32px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.login-card::after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;bottom:-220px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(227,169,207,.35),transparent 65%);pointer-events:none}
+.login-card h1{font-weight:500;font-size:1.6rem;margin-top:10px}
+.login-card .btn{margin-top:8px}
+label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted)}
+input,select{background:#0e0c0f;border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;color:var(--text);outline:none;transition:.2s;width:100%}
+input:focus,select:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(227,169,207,.12)}
+input[type=date]{color-scheme:dark}
+.error{color:var(--red);font-size:.85rem}
+
+/* Layout */
+.app{display:flex;gap:16px;padding:16px;min-height:100%;max-width:1400px;margin:0 auto}
+.sidebar{width:240px;flex-shrink:0;background:#080708;border:1px solid var(--line);border-radius:var(--radius);padding:26px 16px;display:flex;flex-direction:column;gap:30px;position:sticky;top:16px;height:calc(100vh - 32px)}
+.brand{display:flex;align-items:center;gap:10px;font-size:1.2rem;font-weight:500;padding:0 8px}
+.brand-mark{color:var(--accent);font-size:1.4rem}
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;color:#d6ccd4;transition:.2s;text-align:left;width:100%}
+.nav-item:hover{background:rgba(255,255,255,.04)}
+.nav-item.active{background:linear-gradient(90deg,#7a4d6a,#2a1c26 90%);color:#fff}
+.nav-item .count{margin-left:auto;font-size:.75rem;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:999px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px 4px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.welcome{font-weight:400;font-size:2rem}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-chip{display:flex;align-items:center;gap:10px}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:600;background:linear-gradient(135deg,#e3a9cf,#6b3f5c);color:#fff}
+.user-chip small{display:block;color:var(--muted);font-size:.78rem}
+
+/* Cards */
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(3,1fr)}
+.stat{padding:22px 24px;position:relative;overflow:hidden}
+.stat .label{color:#d6ccd4;font-size:1rem;display:flex;justify-content:space-between;align-items:center}
+.stat .value{font-size:2rem;font-weight:500;margin-top:14px;letter-spacing:.3px}
+.stat .sub{font-size:.82rem;color:var(--muted);margin-top:6px}
+.stat.glow{background:radial-gradient(400px 200px at 90% 0%,rgba(227,169,207,.22),transparent 70%),linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel)}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.section-head h2{font-weight:400;font-size:1.25rem}
+.panel{padding:22px 24px}
+
+/* Blocos */
+.blocks{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.block{padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:.2s;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.005)),#151216;border:1px solid var(--line);border-radius:20px;text-align:left;min-height:180px}
+.block:hover{border-color:var(--accent-2);transform:translateY(-2px)}
+.block-top{display:flex;justify-content:space-between;align-items:flex-start}
+.block-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(227,169,207,.1);color:var(--accent)}
+.block-name{font-size:1.1rem}
+.block-amount{font-size:1.45rem;font-weight:500}
+.block-meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.progress{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.progress>i{display:block;height:100%;background:linear-gradient(90deg,#8c5a7a,var(--green));border-radius:99px}
+.block-new{border-style:dashed;align-items:center;justify-content:center;color:var(--muted);background:transparent}
+.block-new:hover{color:var(--accent)}
+.block-new .plus{font-size:2rem;font-weight:300}
+
+/* Lista de despesas */
+.list{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;padding:14px 12px;border-bottom:1px solid var(--line);border-radius:14px;transition:.2s}
+.item:last-child{border-bottom:0}
+.item:hover{background:rgba(255,255,255,.025)}
+.item.paid{background:var(--green-bg);border-bottom-color:transparent;margin-bottom:6px}
+.item.paid .item-amount{color:var(--green)}
+.check{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;transition:.2s}
+.check:hover{border-color:var(--green);color:var(--green)}
+.item.paid .check{background:var(--green);border-color:var(--green);color:#0b1a11}
+.check svg{width:16px;height:16px;stroke-width:2.4}
+.item-name{font-size:1rem}
+.item-sub{font-size:.8rem;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item-amount{font-size:1.05rem;font-weight:500;text-align:right}
+.tag{font-size:.72rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line-2);color:#cfc3cc}
+.tag.green{color:var(--green);border-color:rgba(95,211,141,.35);background:var(--green-bg)}
+.tag.red{color:var(--red);border-color:rgba(255,122,138,.35);background:var(--red-bg)}
+.item-actions{display:flex;gap:4px}
+.item-actions .icon-btn{width:34px;height:34px;border-color:transparent}
+.item-actions .icon-btn svg{width:17px;height:17px}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.month-group{margin-top:10px}
+.month-head{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;padding:10px 12px 6px;text-transform:capitalize}
+
+/* Gráfico */
+.chart-wrap{position:relative}
+.chart{width:100%;height:220px;display:block;overflow:visible}
+.chart circle{fill:#f6c8e4;stroke:#e3a9cf}
+.chart text{fill:var(--muted);font-size:11px;font-family:Outfit,sans-serif}
+.chart-tip{position:absolute;pointer-events:none;background:#1d181e;border:1px solid var(--line-2);border-radius:12px;padding:8px 12px;font-size:.85rem;transform:translate(-50%,-115%);white-space:nowrap}
+.chart-tip small{display:block;color:var(--muted);font-size:.75rem}
+
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px}
+.back:hover{color:var(--accent)}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(5,4,6,.7);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;z-index:50}
+.modal-card{width:100%;max-width:440px;padding:28px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.modal-card h3{font-weight:500;font-size:1.3rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;flex-wrap:wrap}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.switch{display:flex;align-items:center;gap:10px;flex-direction:row;color:var(--text);cursor:pointer}
+.switch input{width:20px;height:20px;accent-color:var(--green)}
+.icon-pick{display:flex;gap:8px;flex-wrap:wrap}
+.icon-pick button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--muted)}
+.icon-pick button.active{border-color:var(--accent);color:var(--accent);background:rgba(227,169,207,.1)}
+
+.toast{position:fixed;bottom:24px;max-width:calc(100% - 32px);left:50%;transform:translateX(-50%);background:#1d181e;border:1px solid var(--line-2);padding:12px 20px;border-radius:999px;z-index:60;font-size:.9rem}
+
+/* Responsivo */
+@media (max-width:1000px){.stats{grid-template-columns:1fr 1fr}.stats .stat:first-child{grid-column:1/-1}}
+@media (max-width:760px){
+  .app{flex-direction:column;padding:12px 16px 96px}
+  .sidebar{position:fixed;bottom:12px;left:12px;right:12px;top:auto;height:auto;width:auto;flex-direction:row;padding:8px;z-index:40;gap:0;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  .sidebar .brand{display:none}
+  .nav{flex-direction:row;gap:4px}
+  .nav-item{flex-direction:column;gap:4px;padding:8px 4px;font-size:.72rem;justify-content:center;align-items:center;text-align:center}
+  .nav-item .count{display:none}
+  .sidebar .logout{width:auto;padding:8px 12px}
+  .main{padding:4px 0}
+  .welcome{font-size:1.5rem}
+  .topbar-right .btn{display:none}
+  .user-chip>div{display:none}
+  .stats{grid-template-columns:1fr}
+  .stat .value{font-size:1.6rem}
+  .item{grid-template-columns:auto 1fr auto;padding:12px 6px;gap:10px}
+  .item-actions{grid-column:2/-1;justify-content:flex-end;margin-top:-6px}
+  .row{grid-template-columns:1fr}
+  .fab{display:flex!important}
+  .toast{bottom:100px}
+}
+.fab{display:none;position:fixed;right:20px;bottom:96px;width:56px;height:56px;border-radius:50%;z-index:41;align-items:center;justify-content:center;font-size:1.8rem;padding:0}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login" class="login hidden">
+  <form id="loginForm" class="login-card glass">
+    <div class="brand" style="padding:0"><span class="brand-mark">◐</span> Minhas Despesas</div>
+    <h1>Bem-vindo de volta</h1>
+    <p class="muted">Entre para organizar suas contas</p>
+    <label>Usuário<input id="loginUser" autocomplete="username" autocapitalize="none" required></label>
+    <label>Senha<input id="loginPass" type="password" autocomplete="current-password" required></label>
+    <p id="loginError" class="error hidden">Usuário ou senha inválidos</p>
+    <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+  </form>
+</section>
+
+<!-- APP -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">◐</span> Despesas</div>
+    <nav class="nav">
+      <button class="nav-item" data-view="dashboard"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/></svg><span>Início</span></button>
+      <button class="nav-item" data-view="debts"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Dívidas</span><span class="count" id="countDebts"></span></button>
+      <button class="nav-item" data-view="paid"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>Pagas</span><span class="count" id="countPaid"></span></button>
+    </nav>
+    <button class="nav-item logout" id="logoutBtn"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/></svg><span>Sair</span></button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1 class="welcome">Bem-vindo, <span class="accent" id="userName"></span></h1>
+        <p class="muted">Aqui está o resumo das suas despesas</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" data-action="new-expense">+ Nova despesa</button>
+        <div class="user-chip"><div class="avatar" id="avatar"></div><div><span id="userName2"></span><small id="todayLabel"></small></div></div>
+      </div>
+    </header>
+    <div id="view"></div>
+  </main>
+  <button class="btn btn-primary fab" data-action="new-expense" aria-label="Nova despesa">+</button>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-card glass" id="modalCard"></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ---------- Usuários ----------
+const USERS = {
+  renan:    { pass: 'ref12345', name: 'Renan' },
+  jhennifer:{ pass: 'jhe12345', name: 'Jhennifer' }
+};
+
+// ---------- Ícones dos blocos ----------
+const ICONS = {
+  home:   '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
+  card:   '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>',
+  car:    '<path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="13" r=".5"/><circle cx="16.5" cy="13" r=".5"/>',
+  cart:   '<circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l3 12h11l2-8H6"/>',
+  bolt:   '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  heart:  '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
+  book:   '<path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6"/><path d="M20 4v14h-6"/>',
+  wallet: '<path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7l12-4v4M16 13h2"/>',
+  phone:  '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  star:   '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'
+};
+const SVG = p => `<svg viewBox="0 0 24 24">${p}</svg>`;
+const I = {
+  check:'<path d="m5 12 5 5 9-10"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+  back:'<path d="m15 18-6-6 6-6"/>',
+  dots:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
+};
+
+// ---------- Utilidades ----------
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const brl = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const todayISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const fmtDate = iso => iso ? iso.split('-').reverse().join('/') : '—';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+
+// ---------- Estado ----------
+let user = null;
+let data = { blocks: [], expenses: [] };
+let route = { view: 'dashboard', blockId: null, filter: 'all' };
+
+const dataKey = () => 'despesas_data_' + user;
+function load() {
+  data = store.get(dataKey(), null);
+  if (!data) {
+    // blocos iniciais de exemplo
+    data = { blocks: [
+      { id: uid(), name: 'Casa', icon: 'home' },
+      { id: uid(), name: 'Cartão de crédito', icon: 'card' },
+      { id: uid(), name: 'Carro', icon: 'car' }
+    ], expenses: [] };
+    save();
+  }
+}
+function save() { store.set(dataKey(), data); }
+
+const blockById = id => data.blocks.find(b => b.id === id);
+const expensesOf = id => data.expenses.filter(e => e.blockId === id);
+const isOverdue = e => !e.paid && e.dueDate && e.dueDate < todayISO();
+const sum = arr => arr.reduce((t, e) => t + Number(e.amount || 0), 0);
+const byDue = (a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999');
+
+// ---------- Login ----------
+function showLogin() {
+  $('#app').classList.add('hidden');
+  $('#login').classList.remove('hidden');
+  $('#loginUser').focus();
+}
+function startApp() {
+  load();
+  const name = USERS[user].name;
+  $('#userName').textContent = name;
+  $('#userName2').textContent = name;
+  $('#avatar').textContent = name[0];
+  $('#todayLabel').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+  $('#login').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  go('dashboard');
+}
+$('#loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u = $('#loginUser').value.trim().toLowerCase();
+  const p = $('#loginPass').value;
+  if (USERS[u] && USERS[u].pass === p) {
+    user = u; store.set('despesas_session', u);
+    $('#loginError').classList.add('hidden'); $('#loginPass').value = '';
+    startApp();
+  } else {
+    $('#loginError').classList.remove('hidden');
+  }
+});
+$('#logoutBtn').addEventListener('click', () => { store.del('despesas_session'); user = null; showLogin(); });
+
+// ---------- Navegação ----------
+document.querySelectorAll('.nav-item[data-view]').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
+document.querySelectorAll('[data-action="new-expense"]').forEach(b => b.addEventListener('click', () => expenseModal(null, route.view === 'block' ? route.blockId : null)));
+
+function go(view, blockId = null) {
+  route = { view, blockId, filter: 'all' };
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function render() {
+  document.querySelectorAll('.nav-item[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === route.view || (route.view === 'block' && b.dataset.view === 'dashboard')));
+  const pending = data.expenses.filter(e => !e.paid).length;
+  const paid = data.expenses.filter(e => e.paid).length;
+  $('#countDebts').textContent = pending || '';
+  $('#countPaid').textContent = paid || '';
+  const v = $('#view');
+  if (route.view === 'dashboard') v.innerHTML = viewDashboard();
+  else if (route.view === 'block') v.innerHTML = viewBlock();
+  else if (route.view === 'debts') v.innerHTML = viewDebts();
+  else if (route.view === 'paid') v.innerHTML = viewPaid();
+  bindView();
+}
+
+// ---------- Views ----------
+function viewDashboard() {
+  const pend = data.expenses.filter(e => !e.paid);
+  const paid = data.expenses.filter(e => e.paid);
+  const over = pend.filter(isOverdue);
+  const month = todayISO().slice(0, 7);
+  const paidMonth = paid.filter(e => (e.paidDate || '').startsWith(month));
+
+  const blocks = data.blocks.map(b => {
+    const ex = expensesOf(b.id);
+    const open = sum(ex.filter(e => !e.paid));
+    const total = sum(ex);
+    const pct = total ? Math.round(sum(ex.filter(e => e.paid)) / total * 100) : 0;
+    const nPend = ex.filter(e => !e.paid).length;
+    return `<div class="block" data-open-block="${b.id}" role="button" tabindex="0">
+      <div class="block-top">
+        <div class="block-icon">${SVG(ICONS[b.icon] || ICONS.wallet)}</div>
+        <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco" style="width:34px;height:34px">${SVG(I.dots)}</button>
+      </div>
+      <div><div class="block-name">${esc(b.name)}</div><div class="muted" style="font-size:.8rem">Em aberto</div></div>
+      <div class="block-amount">${brl(open)}</div>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="block-meta"><span>${nPend} pendente${nPend === 1 ? '' : 's'}</span><span>${pct}% pago</span></div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="grid stats">
+    <div class="glass stat glow"><div class="label">Total em aberto</div><div class="value">${brl(sum(pend))}</div><div class="sub">${pend.length} dívida${pend.length === 1 ? '' : 's'} pendente${pend.length === 1 ? '' : 's'}</div></div>
+    <div class="glass stat"><div class="label">Pago este mês</div><div class="value" style="color:var(--green)">${brl(sum(paidMonth))}</div><div class="sub">${paidMonth.length} pagamento${paidMonth.length === 1 ? '' : 's'}</div></div>
+    <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
+  </div>
+
+  <section class="glass panel" style="margin-top:16px">
+    <div class="section-head"><h2>Meus blocos</h2><button class="btn btn-sm" data-new-block>+ Novo bloco</button></div>
+    <div class="grid blocks">
+      ${blocks}
+      <button class="block block-new" data-new-block><span class="plus">+</span><span>Criar bloco</span></button>
+    </div>
+  </section>
+
+  <section class="glass panel" style="margin-top:16px">
+    <div class="section-head"><h2>Pagamentos por mês</h2><span class="pill active">12 meses</span></div>
+    ${chart()}
+  </section>`;
+}
+
+function filterPills() {
+  const f = route.filter;
+  return `<div class="pills">
+    <button class="pill ${f === 'all' ? 'active' : ''}" data-filter="all">Todas</button>
+    <button class="pill ${f === 'open' ? 'active' : ''}" data-filter="open">Pendentes</button>
+    <button class="pill ${f === 'paid' ? 'active' : ''}" data-filter="paid">Pagas</button>
+  </div>`;
+}
+
+function viewBlock() {
+  const b = blockById(route.blockId);
+  if (!b) { route.view = 'dashboard'; return viewDashboard(); }
+  let ex = expensesOf(b.id);
+  const open = sum(ex.filter(e => !e.paid)), paid = sum(ex.filter(e => e.paid));
+  if (route.filter === 'open') ex = ex.filter(e => !e.paid);
+  if (route.filter === 'paid') ex = ex.filter(e => e.paid);
+  ex.sort((a, b) => (a.paid - b.paid) || byDue(a, b));
+  return `
+  <button class="back" data-go="dashboard">${SVG(I.back)} Voltar aos blocos</button>
+  <div class="grid stats">
+    <div class="glass stat glow"><div class="label"><span style="display:flex;gap:10px;align-items:center">${SVG(ICONS[b.icon] || ICONS.wallet)} ${esc(b.name)}</span>
+      <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco">${SVG(I.edit)}</button></div>
+      <div class="value">${brl(open)}</div><div class="sub">em aberto</div></div>
+    <div class="glass stat"><div class="label">Já pago</div><div class="value" style="color:var(--green)">${brl(paid)}</div><div class="sub">${expensesOf(b.id).filter(e => e.paid).length} pagas</div></div>
+    <div class="glass stat"><div class="label">Total do bloco</div><div class="value">${brl(open + paid)}</div><div class="sub">${expensesOf(b.id).length} lançamentos</div></div>
+  </div>
+  <section class="glass panel" style="margin-top:16px">
+    <div class="section-head"><h2>Despesas</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${filterPills()}<button class="btn btn-primary btn-sm" data-add-in="${b.id}">+ Lançar despesa</button></div>
+    </div>
+    ${list(ex, false)}
+  </section>`;
+}
+
+function viewDebts() {
+  let ex = data.expenses.filter(e => !e.paid);
+  const total = sum(ex);
+  const over = ex.filter(isOverdue);
+  const bf = route.filter;
+  if (bf !== 'all') ex = ex.filter(e => e.blockId === bf);
+  ex.sort(byDue);
+  const pills = `<div class="pills"><button class="pill ${bf === 'all' ? 'active' : ''}" data-filter="all">Todos</button>${
+    data.blocks.map(b => `<button class="pill ${bf === b.id ? 'active' : ''}" data-filter="${b.id}">${esc(b.name)}</button>`).join('')}</div>`;
+  return `
+  <div class="grid stats" style="grid-template-columns:1fr 1fr">
+    <div class="glass stat glow"><div class="label">Todas as dívidas</div><div class="value">${brl(total)}</div><div class="sub">${data.expenses.filter(e => !e.paid).length} pendentes</div></div>
+    <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
+  </div>
+  <section class="glass panel" style="margin-top:16px">
+    <div class="section-head"><h2>Dívidas pendentes</h2>${pills}</div>
+    ${bf !== 'all' ? `<p class="muted" style="margin:-6px 0 10px">Subtotal: ${brl(sum(ex))}</p>` : ''}
+    ${list(ex, true)}
+  </section>`;
+}
+
+function viewPaid() {
+  let ex = data.expenses.filter(e => e.paid);
+  const total = sum(ex);
+  const bf = route.filter;
+  if (bf !== 'all') ex = ex.filter(e => e.blockId === bf);
+  ex.sort((a, b) => (b.paidDate || '').localeCompare(a.paidDate || ''));
+  const groups = {};
+  ex.forEach(e => { const k = (e.paidDate || '0000-00').slice(0, 7); (groups[k] = groups[k] || []).push(e); });
+  const pills = `<div class="pills"><button class="pill ${bf === 'all' ? 'active' : ''}" data-filter="all">Todos</button>${
+    data.blocks.map(b => `<button class="pill ${bf === b.id ? 'active' : ''}" data-filter="${b.id}">${esc(b.name)}</button>`).join('')}</div>`;
+  const body = ex.length ? Object.keys(groups).map(k => {
+    const [y, m] = k.split('-');
+    const label = k === '0000-00' ? 'Sem data' : new Date(+y, +m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    return `<div class="month-group"><div class="month-head"><span>${label}</span><span style="color:var(--green)">${brl(sum(groups[k]))}</span></div>${list(groups[k], true, true)}</div>`;
+  }).join('') : list([], true);
+  return `
+  <div class="grid stats" style="grid-template-columns:1fr 1fr">
+    <div class="glass stat glow"><div class="label">Total já pago</div><div class="value" style="color:var(--green)">${brl(total)}</div><div class="sub">${data.expenses.filter(e => e.paid).length} pagamentos</div></div>
+    <div class="glass stat"><div class="label">Último pagamento</div><div class="value" style="font-size:1.5rem">${ex[0] ? esc(ex[0].name) : '—'}</div><div class="sub">${ex[0] ? fmtDate(ex[0].paidDate) + ' · ' + brl(ex[0].amount) : 'nenhum ainda'}</div></div>
+  </div>
+  <section class="glass panel" style="margin-top:16px">
+    <div class="section-head"><h2>Histórico de pagamentos</h2>${pills}</div>
+    ${body}
+  </section>`;
+}
+
+function list(items, showBlock, inner = false) {
+  if (!items.length) return inner ? '' : `<div class="empty">Nada por aqui ainda ✨</div>`;
+  return `<div class="list">${items.map(e => {
+    const b = blockById(e.blockId);
+    const over = isOverdue(e);
+    const status = e.paid ? `<span class="tag green">Pago em ${fmtDate(e.paidDate)}</span>`
+      : over ? `<span class="tag red">Vencida</span>` : '';
+    return `<div class="item ${e.paid ? 'paid' : ''}">
+      <button class="check" data-toggle="${e.id}" aria-label="${e.paid ? 'Desmarcar pago' : 'Marcar como pago'}">${e.paid ? SVG(I.check) : ''}</button>
+      <div>
+        <div class="item-name">${esc(e.name)}</div>
+        <div class="item-sub">${showBlock && b ? `<span class="tag">${esc(b.name)}</span>` : ''}<span>Vence ${fmtDate(e.dueDate)}</span>${status}</div>
+      </div>
+      <div class="item-amount">${brl(e.amount)}</div>
+      <div class="item-actions">
+        ${e.paid ? '' : `<button class="btn btn-green btn-sm" data-pay="${e.id}">Já paguei</button>`}
+        <button class="icon-btn" data-edit="${e.id}" aria-label="Editar">${SVG(I.edit)}</button>
+        <button class="icon-btn" data-del="${e.id}" aria-label="Excluir">${SVG(I.trash)}</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ---------- Gráfico (SVG) ----------
+function chart() { return `<div class="chart-wrap" id="chartWrap"></div>`; }
+function drawChart() {
+  const wrap = $('#chartWrap'); if (!wrap) return;
+  const now = new Date();
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    months.push({ key, label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
+      full: d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+      v: sum(data.expenses.filter(e => e.paid && (e.paidDate || '').startsWith(key))) });
+  }
+  const W = Math.max(wrap.clientWidth, 280), H = 220, pl = 56, pr = 16, pt = 16, pb = 30;
+  const max = Math.max(...months.map(m => m.v), 100) * 1.15;
+  const x = i => pl + i * (W - pl - pr) / 11;
+  const y = v => pt + (1 - v / max) * (H - pt - pb);
+  const pts = months.map((m, i) => [x(i), y(m.v)]);
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2;
+    d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`;
+  }
+  const area = `${d} L${x(11)},${H - pb} L${x(0)},${H - pb} Z`;
+  const grid = [0, .25, .5, .75, 1].map(f => {
+    const v = max * f, yy = y(v);
+    const lbl = v >= 1000 ? (v / 1000).toFixed(1).replace('.0', '') + 'k' : Math.round(v);
+    return `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="#2c252d" stroke-dasharray="${f ? '3 5' : ''}"/><text x="${pl - 10}" y="${yy + 4}" text-anchor="end">${lbl}</text>`;
+  }).join('');
+  const step = W < 500 ? 2 : 1;
+  const labels = months.map((m, i) => i % step ? '' : `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" style="text-transform:capitalize">${m.label}</text>`).join('');
+  const hits = months.map((m, i) => `<rect x="${x(i) - (W - pl - pr) / 22}" y="0" width="${(W - pl - pr) / 11}" height="${H}" fill="transparent" stroke="none" data-i="${i}"/>`).join('');
+  window.__chart = { months, pts, W, H };
+  wrap.innerHTML = `
+    <svg class="chart" viewBox="0 0 ${W} ${H}" id="chartSvg">
+      <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3a9cf" stop-opacity=".35"/><stop offset="1" stop-color="#e3a9cf" stop-opacity="0"/></linearGradient></defs>
+      ${grid}${labels}
+      <path d="${area}" fill="url(#ga)"/>
+      <path d="${d}" stroke="#e3a9cf" stroke-width="2.5" fill="none"/>
+      <line id="chartLine" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="#e3a9cf" stroke-dasharray="4 4" opacity="0"/>
+      <circle id="chartDot" r="6" stroke-width="3" opacity="0"/>
+      ${hits}
+    </svg>
+    <div class="chart-tip hidden" id="chartTip"></div>`;
+  bindChart();
+}
+window.addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(drawChart, 150); });
+function bindChart() {
+  const svg = $('#chartSvg'); if (!svg) return;
+  const tip = $('#chartTip'), line = $('#chartLine'), dot = $('#chartDot'), c = window.__chart;
+  svg.querySelectorAll('rect[data-i]').forEach(r => {
+    const show = () => {
+      const i = +r.dataset.i, [px, py] = c.pts[i], m = c.months[i];
+      line.setAttribute('x1', px); line.setAttribute('x2', px); line.setAttribute('opacity', '.6');
+      dot.setAttribute('cx', px); dot.setAttribute('cy', py); dot.setAttribute('opacity', '1');
+      tip.style.left = Math.min(Math.max(px, 70), c.W - 70) + 'px';
+      tip.style.top = py + 'px';
+      tip.innerHTML = `<small>${m.full[0].toUpperCase() + m.full.slice(1)}</small>${brl(m.v)}`;
+      tip.classList.remove('hidden');
+    };
+    r.addEventListener('mouseenter', show); r.addEventListener('click', show);
+  });
+  svg.addEventListener('mouseleave', () => { tip.classList.add('hidden'); line.setAttribute('opacity', '0'); dot.setAttribute('opacity', '0'); });
+}
+
+// ---------- Eventos da view ----------
+function bindView() {
+  const v = $('#view');
+  v.querySelectorAll('[data-open-block]').forEach(el => {
+    el.addEventListener('click', () => go('block', el.dataset.openBlock));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') go('block', el.dataset.openBlock); });
+  });
+  v.querySelectorAll('[data-edit-block]').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); blockModal(el.dataset.editBlock); }));
+  v.querySelectorAll('[data-new-block]').forEach(el => el.addEventListener('click', () => blockModal(null)));
+  v.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => go(el.dataset.go)));
+  v.querySelectorAll('[data-filter]').forEach(el => el.addEventListener('click', () => { route.filter = el.dataset.filter; render(); }));
+  v.querySelectorAll('[data-add-in]').forEach(el => el.addEventListener('click', () => expenseModal(null, el.dataset.addIn)));
+  v.querySelectorAll('[data-pay]').forEach(el => el.addEventListener('click', () => payModal(el.dataset.pay)));
+  v.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => {
+    const e = data.expenses.find(x => x.id === el.dataset.toggle);
+    if (e.paid) { e.paid = false; e.paidDate = null; save(); render(); toast('Marcada como pendente'); }
+    else payModal(e.id);
+  }));
+  v.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => expenseModal(el.dataset.edit)));
+  v.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
+    const e = data.expenses.find(x => x.id === el.dataset.del);
+    confirmModal(`Excluir "${esc(e.name)}"?`, 'Essa despesa será removida permanentemente.', () => {
+      data.expenses = data.expenses.filter(x => x.id !== e.id); save(); render(); toast('Despesa excluída');
+    });
+  }));
+  drawChart();
+}
+
+// ---------- Modais ----------
+function openModal(html) { $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); const f = $('#modalCard input'); if (f) setTimeout(() => f.focus(), 50); }
+function closeModal() { $('#modal').classList.add('hidden'); $('#modalCard').innerHTML = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function blockModal(id) {
+  const b = id ? blockById(id) : { name: '', icon: 'wallet' };
+  let icon = b.icon;
+  openModal(`
+    <h3>${id ? 'Editar bloco' : 'Novo bloco'}</h3>
+    <form id="blockForm" style="display:flex;flex-direction:column;gap:14px">
+      <label>Nome do bloco<input id="bName" value="${esc(b.name)}" placeholder="Ex.: Cartão Nubank" required maxlength="40"></label>
+      <label>Ícone</label>
+      <div class="icon-pick" id="iconPick">${Object.keys(ICONS).map(k => `<button type="button" data-icon="${k}" class="${k === icon ? 'active' : ''}">${SVG(ICONS[k])}</button>`).join('')}</div>
+      <div class="modal-actions">
+        ${id ? `<button type="button" class="btn btn-danger" id="bDel" style="margin-right:auto">Excluir</button>` : ''}
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </form>`);
+  $('#iconPick').querySelectorAll('button').forEach(bt => bt.addEventListener('click', () => {
+    icon = bt.dataset.icon; $('#iconPick').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === bt));
+  }));
+  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  $('#blockForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('#bName').value.trim(); if (!name) return;
+    if (id) Object.assign(b, { name, icon });
+    else data.blocks.push({ id: uid(), name, icon });
+    save(); closeModal(); render(); toast(id ? 'Bloco atualizado' : 'Bloco criado');
+  });
+  if (id) $('#bDel').addEventListener('click', () => {
+    const n = expensesOf(id).length;
+    confirmModal(`Excluir o bloco "${esc(b.name)}"?`, n ? `As ${n} despesa(s) dentro dele também serão excluídas.` : 'O bloco está vazio.', () => {
+      data.blocks = data.blocks.filter(x => x.id !== id);
+      data.expenses = data.expenses.filter(x => x.blockId !== id);
+      save(); go('dashboard'); toast('Bloco excluído');
+    });
+  });
+}
+
+function expenseModal(id, blockId) {
+  if (!data.blocks.length) { toast('Crie um bloco primeiro'); blockModal(null); return; }
+  const e = id ? data.expenses.find(x => x.id === id)
+    : { name: '', amount: '', dueDate: todayISO(), blockId: blockId || data.blocks[0].id, paid: false, paidDate: '' };
+  openModal(`
+    <h3>${id ? 'Editar despesa' : 'Nova despesa'}</h3>
+    <form id="expForm" style="display:flex;flex-direction:column;gap:14px">
+      <label>Nome da dívida<input id="eName" value="${esc(e.name)}" placeholder="Ex.: Conta de luz" required maxlength="60"></label>
+      <div class="row">
+        <label>Valor (R$)<input id="eAmount" type="number" inputmode="decimal" step="0.01" min="0" value="${e.amount}" placeholder="0,00" required></label>
+        <label>Vencimento<input id="eDue" type="date" value="${e.dueDate || ''}" required></label>
+      </div>
+      <label>Bloco<select id="eBlock">${data.blocks.map(b => `<option value="${b.id}" ${b.id === e.blockId ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
+      <label class="switch"><input type="checkbox" id="ePaid" ${e.paid ? 'checked' : ''}> Já paguei</label>
+      <label id="ePaidWrap" class="${e.paid ? '' : 'hidden'}">Data do pagamento<input id="ePaidDate" type="date" value="${e.paidDate || todayISO()}"></label>
+      <div class="modal-actions">
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </form>`);
+  $('#ePaid').addEventListener('change', ev => $('#ePaidWrap').classList.toggle('hidden', !ev.target.checked));
+  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  $('#expForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const paid = $('#ePaid').checked;
+    const vals = {
+      name: $('#eName').value.trim(),
+      amount: Math.round(parseFloat($('#eAmount').value) * 100) / 100 || 0,
+      dueDate: $('#eDue').value,
+      blockId: $('#eBlock').value,
+      paid,
+      paidDate: paid ? ($('#ePaidDate').value || todayISO()) : null
+    };
+    if (id) Object.assign(e, vals);
+    else data.expenses.push({ id: uid(), createdAt: Date.now(), ...vals });
+    save(); closeModal(); render(); toast(id ? 'Despesa atualizada' : 'Despesa lançada');
+  });
+}
+
+function payModal(id) {
+  const e = data.expenses.find(x => x.id === id);
+  openModal(`
+    <h3>Marcar como pago</h3>
+    <p class="muted">${esc(e.name)} · ${brl(e.amount)}</p>
+    <form id="payForm" style="display:flex;flex-direction:column;gap:14px">
+      <label>Data do pagamento<input id="pDate" type="date" value="${todayISO()}" required></label>
+      <div class="modal-actions">
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button class="btn btn-green">${SVG(I.check)} Já paguei</button>
+      </div>
+    </form>`);
+  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  $('#payForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    e.paid = true; e.paidDate = $('#pDate').value || todayISO();
+    save(); closeModal(); render(); toast('Pagamento registrado ✓');
+  });
+}
+
+function confirmModal(title, text, onOk) {
+  openModal(`<h3>${title}</h3><p class="muted">${text}</p>
+    <div class="modal-actions"><button class="btn" data-close>Cancelar</button><button class="btn btn-danger" id="cOk">Excluir</button></div>`);
+  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  $('#cOk').addEventListener('click', () => { closeModal(); onOk(); });
+}
+
+let toastT;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2200);
+}
+
+// ---------- Início ----------
+const saved = store.get('despesas_session', null);
+if (saved && USERS[saved]) { user = saved; startApp(); } else showLogin();
+</script>
+</body>
+</html>
