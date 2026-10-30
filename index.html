@@ -258,7 +258,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .toast{position:fixed;bottom:24px;max-width:calc(100% - 32px);left:50%;transform:translateX(-50%);background:#1d181e;border:1px solid var(--line-2);padding:12px 20px;border-radius:999px;z-index:60;font-size:.9rem}
 
 /* Responsivo */
-@media (max-width:1000px){.stats{grid-template-columns:1fr 1fr}.stats .stat:first-child{grid-column:1/-1}}
+@media (max-width:1000px){.stats{grid-template-columns:1fr 1fr}.stats:not(.two) .stat:first-child{grid-column:1/-1}}
+/* Barra de mês */
+.monthbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:8px;border-radius:999px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel);border:1px solid var(--line)}
+.monthbar .icon-btn{flex-shrink:0;border-color:transparent;background:rgba(255,255,255,.04)}
+.monthbar .icon-btn:disabled{opacity:.3;cursor:default}
+.mb-title{flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.mb-title strong{font-weight:500;font-size:1.05rem}
+.mb-today{font-size:.75rem;color:var(--accent);margin-top:2px}
+.monthbar .pill{flex-shrink:0;margin-right:4px}
+
 /* Próximos vencimentos */
 .upcoming .item-sub .when{color:var(--accent)}
 .upcoming .item-sub .when.late{color:var(--red)}
@@ -296,7 +305,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .avatar{width:40px;height:40px}
   .grid{gap:10px}
   .stats{grid-template-columns:1fr 1fr!important}
-  .stats .stat:first-child{grid-column:1/-1}
+  .stats:not(.two) .stat:first-child{grid-column:1/-1}
+  .stats.two .stat:first-child .value{font-size:1.4rem}
   .stat{padding:16px;border-radius:20px}
   .stat .label{font-size:.85rem}
   .stat .value{font-size:1.25rem;margin-top:8px}
@@ -335,6 +345,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .cal-day .amt{display:none}
   .dot{width:6px;height:6px}
   .legend{gap:12px;font-size:.75rem}
+  .monthbar{position:sticky;top:calc(6px + env(safe-area-inset-top));z-index:30;margin-bottom:12px;background:rgba(14,16,11,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
   .modal{place-items:end stretch;padding:0}
   .modal-card,.modal-card.wide{max-width:none;width:100%;border-radius:28px 28px 0 0;padding:12px 18px calc(18px + env(safe-area-inset-bottom));max-height:92vh;max-height:92dvh;animation:sheetUp .22s cubic-bezier(.2,.8,.2,1);border-bottom:0}
   .modal-card::before{content:"";display:block;width:40px;height:5px;border-radius:99px;background:var(--line-2);margin:0 auto 6px;flex-shrink:0}
@@ -467,7 +478,8 @@ let me = null;           // { id, nome }
 let membros = {};        // user_id -> nome
 let data = { blocos: [], fixas: [], despesas: [] };
 let route = { view: 'dashboard', blockId: null, filter: 'all' };
-let calMonth = monthStart(todayISO());
+let mes = monthStart(todayISO());   // mês escolhido (dia 1)
+let debtsAll = false;               // tela Dívidas: ver todos os meses
 
 const blockById = id => data.blocos.find(b => b.id === id);
 const fixaById = id => data.fixas.find(f => f.id === id);
@@ -475,6 +487,11 @@ const despById = id => data.despesas.find(e => e.id === id);
 const expensesOf = id => data.despesas.filter(e => e.bloco_id === id);
 const isOverdue = e => !e.pago && e.vencimento < todayISO();
 const sum = arr => arr.reduce((t, e) => t + Number(e.valor || 0), 0);
+const curMes = () => monthStart(todayISO());
+const mesLabel = m => cap(new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
+const mesCurto = m => new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString('pt-BR', { month: 'long' });
+// despesas do mês escolhido; no mês atual entram também as atrasadas de meses anteriores
+const doMes = list => list.filter(e => e.vencimento.startsWith(mes.slice(0, 7)) || (mes === curMes() && !e.pago && e.vencimento < mes));
 const byDue = (a, b) => a.vencimento.localeCompare(b.vencimento) || (a.parcela_num || 0) - (b.parcela_num || 0);
 
 // ---------- Acesso ao banco ----------
@@ -572,14 +589,33 @@ function render() {
 // ---------- Views ----------
 const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
 
+function monthBar(withAll = false) {
+  const all = withAll && debtsAll;
+  return `<div class="monthbar">
+    <button class="icon-btn" data-mes="-1" aria-label="Mês anterior" ${all ? 'disabled' : ''}>${SVG(I.back)}</button>
+    <div class="mb-title"><strong>${all ? 'Todos os meses' : mesLabel(mes)}</strong>${!all && mes !== curMes() ? '<button class="mb-today" data-mes="0">voltar para este mês</button>' : ''}</div>
+    <button class="icon-btn" data-mes="1" aria-label="Próximo mês" ${all ? 'disabled' : ''}>${SVG(I.next)}</button>
+    ${withAll ? `<button class="pill ${all ? 'active' : ''}" data-all>Tudo</button>` : ''}
+  </div>`;
+}
+
+function emptyMonth(items) {
+  const prox = data.despesas.filter(e => !e.pago && e.vencimento >= addMonths(mes, 1, 1)).sort(byDue)[0];
+  if (!prox) return `<div class="empty">Nada para pagar em ${mesCurto(mes)} ✨</div>`;
+  const pm = monthStart(prox.vencimento);
+  const totalPm = sum(items.filter(e => !e.pago && monthStart(e.vencimento) === pm));
+  return `<div class="empty">Nada para pagar em ${mesCurto(mes)} ✨<br>
+    <button class="btn btn-sm" style="margin-top:14px" data-mes-go="${pm}">Ver ${mesCurto(pm)} · ${brl(totalPm)}</button></div>`;
+}
+
 function viewDashboard() {
-  const pend = data.despesas.filter(e => !e.pago);
-  const over = pend.filter(isOverdue);
-  const month = todayISO().slice(0, 7);
-  const paidMonth = data.despesas.filter(e => e.pago && (e.data_pagamento || '').startsWith(month));
+  const doM = doMes(data.despesas);
+  const pend = doM.filter(e => !e.pago), pagas = doM.filter(e => e.pago);
+  const over = data.despesas.filter(isOverdue);
+  const restante = data.despesas.filter(e => !e.pago);
 
   const blocks = data.blocos.map(b => {
-    const ex = expensesOf(b.id);
+    const ex = doMes(expensesOf(b.id));
     const total = sum(ex), pago = sum(ex.filter(e => e.pago));
     const pct = total ? Math.round(pago / total * 100) : 0;
     const nPend = ex.filter(e => !e.pago).length;
@@ -588,7 +624,7 @@ function viewDashboard() {
         <div class="block-icon">${SVG(ICONS[b.icone] || ICONS.wallet)}</div>
         <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco" style="width:34px;height:34px">${SVG(I.dots)}</button>
       </div>
-      <div><div class="block-name">${esc(b.nome)}</div><div class="muted" style="font-size:.8rem">Em aberto</div></div>
+      <div><div class="block-name">${esc(b.nome)}</div><div class="muted" style="font-size:.8rem">A pagar em ${mesCurto(mes)}</div></div>
       <div class="block-amount">${brl(total - pago)}</div>
       <div class="progress"><i style="width:${pct}%"></i></div>
       <div class="block-meta"><span>${plural(nPend, 'pendente', 'pendentes')}</span><span>${pct}% pago</span></div>
@@ -596,9 +632,10 @@ function viewDashboard() {
   }).join('');
 
   return `
+  ${monthBar()}
   <div class="grid stats">
-    <div class="glass stat glow"><div class="label">Total em aberto</div><div class="value">${brl(sum(pend))}</div><div class="sub">${plural(pend.length, 'dívida pendente', 'dívidas pendentes')}</div></div>
-    <div class="glass stat"><div class="label">Pago este mês</div><div class="value" style="color:var(--green)">${brl(sum(paidMonth))}</div><div class="sub">${plural(paidMonth.length, 'pagamento', 'pagamentos')}</div></div>
+    <div class="glass stat glow"><div class="label">A pagar em ${mesCurto(mes)}</div><div class="value">${brl(sum(pend))}</div><div class="sub">${plural(pend.length, 'conta', 'contas')} · total restante ${brl(sum(restante))}</div></div>
+    <div class="glass stat"><div class="label">Pago em ${mesCurto(mes)}</div><div class="value" style="color:var(--green)">${brl(sum(pagas))}</div><div class="sub">${plural(pagas.length, 'conta paga', 'contas pagas')}</div></div>
     <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
   </div>
 
@@ -641,14 +678,14 @@ function upcoming() {
 }
 
 function calendar() {
-  const [y, m] = calMonth.split('-').map(Number);
+  const [y, m] = mes.split('-').map(Number);
   const first = new Date(y, m - 1, 1);
   const start = new Date(y, m - 1, 1 - first.getDay());   // domingo antes do dia 1
   const title = cap(first.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
   const today = todayISO();
   const byDay = {};
   data.despesas.forEach(e => (byDay[e.vencimento] = byDay[e.vencimento] || []).push(e));
-  const monthItems = data.despesas.filter(e => e.vencimento.startsWith(calMonth.slice(0, 7)));
+  const monthItems = data.despesas.filter(e => e.vencimento.startsWith(mes.slice(0, 7)));
   const cells = [];
   for (let i = 0; i < 42; i++) {
     const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
@@ -664,10 +701,9 @@ function calendar() {
   return `
     <div class="section-head"><h2>Calendário</h2>
       <div class="cal-nav">
-        <button class="icon-btn" data-cal="-1" aria-label="Mês anterior">${SVG(I.back)}</button>
+        <button class="icon-btn" data-mes="-1" aria-label="Mês anterior">${SVG(I.back)}</button>
         <span class="cal-title">${title}</span>
-        <button class="icon-btn" data-cal="1" aria-label="Próximo mês">${SVG(I.next)}</button>
-        <button class="btn btn-sm" data-cal="0">Hoje</button>
+        <button class="icon-btn" data-mes="1" aria-label="Próximo mês">${SVG(I.next)}</button>
       </div>
     </div>
     <p class="muted" style="margin:-8px 0 12px">No mês: ${brl(sum(monthItems))} · pago ${brl(sum(monthItems.filter(e => e.pago)))}</p>
@@ -686,21 +722,24 @@ function filterPills() {
 
 function viewBlock() {
   const b = blockById(route.blockId);
-  const all = expensesOf(b.id);
+  const tudo = expensesOf(b.id);
+  const all = doMes(tudo);
   let ex = all;
   const open = sum(all.filter(e => !e.pago)), paid = sum(all.filter(e => e.pago));
+  const restante = sum(tudo.filter(e => !e.pago));
   if (route.filter === 'open') ex = ex.filter(e => !e.pago);
   if (route.filter === 'paid') ex = ex.filter(e => e.pago);
   ex = [...ex].sort((a, c) => (a.pago - c.pago) || byDue(a, c));
   const fixas = data.fixas.filter(f => f.bloco_id === b.id);
   return `
   <button class="back" data-go="dashboard">${SVG(I.back)} Voltar aos blocos</button>
+  ${monthBar()}
   <div class="grid stats">
     <div class="glass stat glow"><div class="label"><span style="display:flex;gap:10px;align-items:center">${SVG(ICONS[b.icone] || ICONS.wallet)} ${esc(b.nome)}</span>
       <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco">${SVG(I.edit)}</button></div>
-      <div class="value">${brl(open)}</div><div class="sub">em aberto</div></div>
-    <div class="glass stat"><div class="label">Já pago</div><div class="value" style="color:var(--green)">${brl(paid)}</div><div class="sub">${plural(all.filter(e => e.pago).length, 'paga', 'pagas')}</div></div>
-    <div class="glass stat"><div class="label">Total do bloco</div><div class="value">${brl(open + paid)}</div><div class="sub">${plural(all.length, 'lançamento', 'lançamentos')}</div></div>
+      <div class="value">${brl(open)}</div><div class="sub">a pagar em ${mesCurto(mes)}</div></div>
+    <div class="glass stat"><div class="label">Pago no mês</div><div class="value" style="color:var(--green)">${brl(paid)}</div><div class="sub">${plural(all.filter(e => e.pago).length, 'paga', 'pagas')} de ${all.length}</div></div>
+    <div class="glass stat"><div class="label">Total restante</div><div class="value">${brl(restante)}</div><div class="sub">somando todos os meses</div></div>
   </div>
   ${fixas.length ? `<section class="glass panel fixas" style="margin-top:16px">
     <div class="section-head"><h2>Contas fixas</h2><span class="muted">${brl(sum(fixas.filter(f => !f.fim)))} / mês</span></div>
@@ -718,10 +757,10 @@ function viewBlock() {
     </div>`; }).join('')}</div>
   </section>` : ''}
   <section class="glass panel" style="margin-top:16px">
-    <div class="section-head"><h2>Despesas</h2>
+    <div class="section-head"><h2>Contas de ${mesCurto(mes)}</h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap">${filterPills()}<button class="btn btn-primary btn-sm add-btn" data-add-in="${b.id}">+ Lançar despesa</button></div>
     </div>
-    ${list(ex, false)}
+    ${ex.length ? list(ex, false) : route.filter === 'all' ? emptyMonth(tudo) : list(ex, false)}
   </section>`;
 }
 
@@ -734,17 +773,19 @@ function blockPills() {
 function viewDebts() {
   const allPend = data.despesas.filter(e => !e.pago);
   const over = allPend.filter(isOverdue);
-  let ex = route.filter === 'all' ? allPend : allPend.filter(e => e.bloco_id === route.filter);
+  const base = debtsAll ? allPend : doMes(allPend);
+  let ex = route.filter === 'all' ? base : base.filter(e => e.bloco_id === route.filter);
   ex = [...ex].sort(byDue);
   return `
-  <div class="grid stats" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-    <div class="glass stat glow"><div class="label">Todas as dívidas</div><div class="value">${brl(sum(allPend))}</div><div class="sub">${plural(allPend.length, 'pendente', 'pendentes')}</div></div>
+  ${monthBar(true)}
+  <div class="grid stats two" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="glass stat glow"><div class="label">${debtsAll ? 'Todas as dívidas' : 'A pagar em ' + mesCurto(mes)}</div><div class="value">${brl(sum(base))}</div><div class="sub">${plural(base.length, 'pendente', 'pendentes')}${debtsAll ? '' : ' · total restante ' + brl(sum(allPend))}</div></div>
     <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
   </div>
   <section class="glass panel" style="margin-top:16px">
-    <div class="section-head"><h2>Dívidas pendentes</h2>${blockPills()}</div>
+    <div class="section-head"><h2>${debtsAll ? 'Todas as dívidas' : 'Dívidas de ' + mesCurto(mes)}</h2>${blockPills()}</div>
     ${route.filter !== 'all' ? `<p class="muted" style="margin:-6px 0 10px">Subtotal: ${brl(sum(ex))}</p>` : ''}
-    ${list(ex, true)}
+    ${ex.length || debtsAll || route.filter !== 'all' ? list(ex, true) : emptyMonth(allPend)}
   </section>`;
 }
 
@@ -821,11 +862,13 @@ function bindView(root) {
   on('[data-edit]', el => expenseModal(el.dataset.edit));
   on('[data-edit-fixa]', el => fixaModal(el.dataset.editFixa));
   on('[data-del]', el => deleteModal(el.dataset.del));
-  on('[data-cal]', el => {
-    const k = +el.dataset.cal;
-    calMonth = k ? addMonths(calMonth, k, 1) : monthStart(todayISO());
+  on('[data-mes]', el => {
+    const k = +el.dataset.mes;
+    mes = k ? addMonths(mes, k, 1) : curMes();
     render();
   });
+  on('[data-mes-go]', el => { mes = el.dataset.mesGo; debtsAll = false; render(); });
+  on('[data-all]', () => { debtsAll = !debtsAll; render(); });
   on('[data-day]', el => dayModal(el.dataset.day));
   // no celular, tocar na despesa abre a gaveta de ações
   root.querySelectorAll('[data-item]').forEach(el => el.addEventListener('click', ev => {
