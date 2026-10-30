@@ -73,7 +73,8 @@ create policy desp_blocos_all on public.desp_blocos for all to authenticated usi
 create policy desp_fixas_all on public.desp_fixas for all to authenticated using ((select public.desp_is_member())) with check ((select public.desp_is_member()));
 create policy desp_despesas_all on public.desp_despesas for all to authenticated using ((select public.desp_is_member())) with check ((select public.desp_is_member()));
 
--- Lança as ocorrências mensais das contas fixas até o mês atual (horário de Brasília).
+-- Lança as ocorrências mensais das contas fixas até o mês atual (horário de Brasília),
+-- sempre incluindo o primeiro mês da conta, mesmo que seja futuro.
 -- Usa gerado_ate para não recriar meses já lançados (mesmo que tenham sido excluídos).
 create or replace function public.desp_gerar_fixas()
 returns integer language plpgsql security invoker set search_path = ''
@@ -91,7 +92,7 @@ begin
     from public.desp_fixas f
     cross join lateral generate_series(
       coalesce((f.gerado_ate + interval '1 month')::date, f.inicio),
-      least(mes_atual, coalesce(f.fim, mes_atual)),
+      least(greatest(mes_atual, f.inicio), coalesce(f.fim, greatest(mes_atual, f.inicio))),
       interval '1 month') m
   ), ins as (
     insert into public.desp_despesas (bloco_id, nome, valor, vencimento, tipo, fixa_id, mes_ref, criado_por)
@@ -105,9 +106,9 @@ begin
   select count(*) into n from ins;
 
   update public.desp_fixas f
-     set gerado_ate = least(mes_atual, coalesce(f.fim, mes_atual))
-   where (f.gerado_ate is null or f.gerado_ate < least(mes_atual, coalesce(f.fim, mes_atual)))
-     and f.inicio <= least(mes_atual, coalesce(f.fim, mes_atual));
+     set gerado_ate = least(greatest(mes_atual, f.inicio), coalesce(f.fim, greatest(mes_atual, f.inicio)))
+   where (f.gerado_ate is null or f.gerado_ate < least(greatest(mes_atual, f.inicio), coalesce(f.fim, greatest(mes_atual, f.inicio))))
+     and (f.fim is null or f.inicio <= f.fim);
 
   return n;
 end $$;

@@ -11,16 +11,16 @@
 <style>
 :root{
   --bg:#0b090c; --panel:#121013; --panel-2:#19151a; --line:#2c252d; --line-2:#3d343f;
-  --text:#f3edf2; --muted:#9a8f99; --accent:#e3a9cf; --accent-2:#a8728f;
-  --plum:#5b3a50; --green:#5fd38d; --green-bg:rgba(95,211,141,.10); --red:#ff7a8a; --red-bg:rgba(255,122,138,.10);
+  --text:#f3edf2; --muted:#9a8f99; --accent:#c6ff3d; --accent-2:#78a828;
+  --plum:#3f5c14; --green:#5fd38d; --green-bg:rgba(95,211,141,.10); --red:#ff7a8a; --red-bg:rgba(255,122,138,.10);
   --radius:22px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
   font-family:'Outfit',system-ui,sans-serif;color:var(--text);
-  background:radial-gradient(1200px 700px at 70% -10%,#3a2433 0%,transparent 60%),
-             radial-gradient(900px 600px at -10% 110%,#2a1a26 0%,transparent 60%),var(--bg);
+  background:radial-gradient(1200px 700px at 70% -10%,#1d2b0e 0%,transparent 60%),
+             radial-gradient(900px 600px at -10% 110%,#142009 0%,transparent 60%),var(--bg);
   background-attachment:fixed;-webkit-font-smoothing:antialiased;
 }
 button,input,select{font:inherit;color:inherit}
@@ -36,9 +36,9 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke
 
 /* Botões / pills */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:999px;border:1px solid var(--line-2);transition:.2s;white-space:nowrap;font-size:.95rem}
-.btn:hover{border-color:var(--accent-2);background:rgba(227,169,207,.06)}
-.btn-primary{border:0;background:linear-gradient(135deg,#c98bb3,#8c5a7a);color:#fff;box-shadow:0 8px 30px -10px rgba(201,139,179,.6)}
-.btn-primary:hover{filter:brightness(1.1);background:linear-gradient(135deg,#c98bb3,#8c5a7a)}
+.btn:hover{border-color:var(--accent-2);background:rgba(198,255,61,.06)}
+.btn-primary{border:0;background:linear-gradient(135deg,#d4ff5c,#8fd12b);color:#0b1204;box-shadow:0 8px 30px -10px rgba(198,255,61,.6)}
+.btn-primary:hover{filter:brightness(1.1);background:linear-gradient(135deg,#d4ff5c,#8fd12b)}
 .btn-green{border:0;background:var(--green-bg);color:var(--green)}
 .btn-green:hover{background:rgba(95,211,141,.18)}
 .btn-danger{color:var(--red);border-color:rgba(255,122,138,.35)}
@@ -50,17 +50,17 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke
 .pills{display:flex;gap:6px;flex-wrap:wrap}
 .pill{padding:7px 16px;border-radius:999px;border:1px solid var(--line-2);font-size:.85rem;transition:.2s}
 .pill:hover{border-color:var(--accent-2)}
-.pill.active{background:linear-gradient(90deg,#7a4d6a,#3d2836);border-color:transparent}
+.pill.active{background:linear-gradient(90deg,#3f5c14,#1b2709);border-color:transparent}
 
 /* Login */
 .login{min-height:100%;display:grid;place-items:center;padding:16px}
 .login-card{width:100%;max-width:400px;padding:36px 32px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
-.login-card::after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;bottom:-220px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(227,169,207,.35),transparent 65%);pointer-events:none}
+.login-card::after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;bottom:-220px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(198,255,61,.35),transparent 65%);pointer-events:none}
 .login-card h1{font-weight:500;font-size:1.6rem;margin-top:10px}
 .login-card .btn{margin-top:8px}
 label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted)}
 input,select{background:#0e0c0f;border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;color:var(--text);outline:none;transition:.2s;width:100%}
-input:focus,select:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(227,169,207,.12)}
+input:focus,select:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(198,255,61,.12)}
 input[type=date]{color-scheme:dark}
 .error{color:var(--red);font-size:.85rem}
 
@@ -72,14 +72,14 @@ input[type=date]{color-scheme:dark}
 .nav{display:flex;flex-direction:column;gap:6px;flex:1}
 .nav-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;color:#d6ccd4;transition:.2s;text-align:left;width:100%}
 .nav-item:hover{background:rgba(255,255,255,.04)}
-.nav-item.active{background:linear-gradient(90deg,#7a4d6a,#2a1c26 90%);color:#fff}
+.nav-item.active{background:linear-gradient(90deg,#3f5c14,#121a07 90%);color:#fff}
 .nav-item .count{margin-left:auto;font-size:.75rem;background:rgba(255,255,255,.08);padding:2px 8px;border-radius:999px}
 .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px;padding:12px 4px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .welcome{font-weight:400;font-size:2rem}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .user-chip{display:flex;align-items:center;gap:10px}
-.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:600;background:linear-gradient(135deg,#e3a9cf,#6b3f5c);color:#fff}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:600;background:linear-gradient(135deg,#d4ff5c,#5d8f1c);color:#0b1204}
 .user-chip small{display:block;color:var(--muted);font-size:.78rem}
 
 /* Cards */
@@ -89,7 +89,7 @@ input[type=date]{color-scheme:dark}
 .stat .label{color:#d6ccd4;font-size:1rem;display:flex;justify-content:space-between;align-items:center}
 .stat .value{font-size:2rem;font-weight:500;margin-top:14px;letter-spacing:.3px}
 .stat .sub{font-size:.82rem;color:var(--muted);margin-top:6px}
-.stat.glow{background:radial-gradient(400px 200px at 90% 0%,rgba(227,169,207,.22),transparent 70%),linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel)}
+.stat.glow{background:radial-gradient(400px 200px at 90% 0%,rgba(198,255,61,.22),transparent 70%),linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel)}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .section-head h2{font-weight:400;font-size:1.25rem}
 .panel{padding:22px 24px}
@@ -99,12 +99,12 @@ input[type=date]{color-scheme:dark}
 .block{padding:20px;display:flex;flex-direction:column;gap:14px;cursor:pointer;transition:.2s;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.005)),#151216;border:1px solid var(--line);border-radius:20px;text-align:left;min-height:180px}
 .block:hover{border-color:var(--accent-2);transform:translateY(-2px)}
 .block-top{display:flex;justify-content:space-between;align-items:flex-start}
-.block-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(227,169,207,.1);color:var(--accent)}
+.block-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(198,255,61,.1);color:var(--accent)}
 .block-name{font-size:1.1rem}
 .block-amount{font-size:1.45rem;font-weight:500}
 .block-meta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
 .progress{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
-.progress>i{display:block;height:100%;background:linear-gradient(90deg,#8c5a7a,var(--green));border-radius:99px}
+.progress>i{display:block;height:100%;background:linear-gradient(90deg,#5d8f1c,var(--green));border-radius:99px}
 .block-new{border-style:dashed;align-items:center;justify-content:center;color:var(--muted);background:transparent}
 .block-new:hover{color:var(--accent)}
 .block-new .plus{font-size:2rem;font-weight:300}
@@ -139,7 +139,7 @@ input[type=date]{color-scheme:dark}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .cal-dow{text-align:center;font-size:.75rem;color:var(--muted);padding:2px 0 4px;text-transform:capitalize}
 .cal-day{min-height:84px;border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:5px;text-align:left;transition:.2s;background:rgba(255,255,255,.015);min-width:0}
-.cal-day:hover{border-color:var(--accent-2);background:rgba(227,169,207,.05)}
+.cal-day:hover{border-color:var(--accent-2);background:rgba(198,255,61,.05)}
 .cal-day.out{opacity:.3}
 .cal-day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .cal-day.over{background:var(--red-bg)}
@@ -155,13 +155,13 @@ input[type=date]{color-scheme:dark}
 .modal-card .item{padding:12px 6px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#0e0c0f;border:1px solid var(--line-2);border-radius:999px;padding:4px}
 .seg button{padding:8px 6px;border-radius:999px;font-size:.88rem;color:var(--muted);transition:.2s}
-.seg button.active{background:linear-gradient(90deg,#7a4d6a,#3d2836);color:#fff}
-.hint{font-size:.8rem;color:var(--muted);background:rgba(227,169,207,.06);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.seg button.active{background:linear-gradient(90deg,#3f5c14,#1b2709);color:#fff}
+.hint{font-size:.8rem;color:var(--muted);background:rgba(198,255,61,.06);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .loading{position:fixed;inset:0;display:grid;place-items:center;z-index:70;background:rgba(5,4,6,.55)}
 .spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--line-2);border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .fixas .item{grid-template-columns:auto 1fr auto auto}
-.fx-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(227,169,207,.1);color:var(--accent)}
+.fx-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(198,255,61,.1);color:var(--accent)}
 .fx-icon svg{width:16px;height:16px}
 
 .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px}
@@ -172,12 +172,72 @@ input[type=date]{color-scheme:dark}
 .modal-card{width:100%;max-width:440px;padding:28px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
 .modal-card h3{font-weight:500;font-size:1.3rem}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;flex-wrap:wrap}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .switch{display:flex;align-items:center;gap:10px;flex-direction:row;color:var(--text);cursor:pointer}
 .switch input{width:20px;height:20px;accent-color:var(--green)}
 .icon-pick{display:flex;gap:8px;flex-wrap:wrap}
 .icon-pick button{width:42px;height:42px;border-radius:12px;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--muted)}
-.icon-pick button.active{border-color:var(--accent);color:var(--accent);background:rgba(227,169,207,.1)}
+.icon-pick button.active{border-color:var(--accent);color:var(--accent);background:rgba(198,255,61,.1)}
+
+/* Campos personalizados (data, lista, número) */
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.field-btn{display:flex;align-items:center;gap:10px;width:100%;background:#0e0c0f;border:1px solid var(--line-2);border-radius:14px;padding:11px 14px;color:var(--text);text-align:left;transition:.2s;min-height:46px}
+.field-btn:hover{border-color:var(--accent-2)}
+.field-btn.open,.field-btn:focus-visible{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(198,255,61,.12);outline:none}
+.field-btn .fb-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.field-btn .fb-sub{color:var(--muted);font-size:.8rem}
+.field-btn>svg{color:var(--accent);width:18px;height:18px}
+.field-btn .chev{color:var(--muted);transition:.2s}
+.field-btn.open .chev{transform:rotate(180deg)}
+.money-wrap{position:relative}
+.money-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:.9rem}
+.money-wrap input{padding-left:42px;font-variant-numeric:tabular-nums}
+.stepper{display:grid;grid-template-columns:44px 1fr 44px;background:#0e0c0f;border:1px solid var(--line-2);border-radius:14px;overflow:hidden;transition:.2s}
+.stepper:focus-within{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(198,255,61,.12)}
+.stepper input{border:0;border-radius:0;text-align:center;background:transparent;box-shadow:none!important;padding:11px 4px}
+.stepper button{color:var(--accent);font-size:1.25rem;transition:.2s}
+.stepper button:hover{background:rgba(198,255,61,.1)}
+.pop{position:fixed;z-index:80;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015)),#151216;border:1px solid var(--line-2);border-radius:20px;box-shadow:0 24px 60px -12px rgba(0,0,0,.8),0 0 0 1px rgba(198,255,61,.06);padding:14px;animation:popIn .14s ease-out}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:none}}
+.dp{width:300px}
+.dp-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
+.dp-title{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:500;transition:.2s}
+.dp-title:hover{background:rgba(255,255,255,.06)}
+.dp-title svg{width:14px;height:14px;color:var(--muted)}
+.dp-nav{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#d6ccd4;transition:.2s}
+.dp-nav:hover{background:rgba(198,255,61,.12);color:var(--accent)}
+.dp-nav svg{width:16px;height:16px}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-dow{text-align:center;font-size:.72rem;color:var(--muted);padding:4px 0 6px;text-transform:uppercase;letter-spacing:.5px}
+.dp-day{position:relative;height:38px;border-radius:12px;font-size:.9rem;display:grid;place-items:center;transition:.15s}
+.dp-day:hover{background:rgba(198,255,61,.12)}
+.dp-day.out{color:#5d535c}
+.dp-day.today{box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+.dp-day.sel{background:linear-gradient(135deg,#d4ff5c,#8fd12b);color:#0b1204;box-shadow:0 6px 18px -6px rgba(198,255,61,.7)}
+.dp-day i{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent-2)}
+.dp-day.sel i{background:#0b1204}
+.dp-months{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dp-months button{padding:14px 4px;border-radius:12px;font-size:.9rem;transition:.15s}
+.dp-months button:hover{background:rgba(198,255,61,.12)}
+.dp-months button.sel{background:linear-gradient(135deg,#d4ff5c,#8fd12b);color:#0b1204}
+.dp-months button.cur{box-shadow:inset 0 0 0 1px var(--accent)}
+.dp-foot{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dp-foot .pill{padding:6px 12px;font-size:.8rem}
+.sel-list{display:flex;flex-direction:column;gap:2px;max-height:300px;overflow:auto;min-width:220px}
+.sel-opt{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;text-align:left;transition:.15s}
+.sel-opt:hover,.sel-opt.kb{background:rgba(198,255,61,.1)}
+.sel-opt.sel{color:var(--accent)}
+.sel-opt .ok{margin-left:auto;opacity:0}
+.sel-opt.sel .ok{opacity:1}
+.sel-opt .oi{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(198,255,61,.1);color:var(--accent)}
+.sel-opt .oi svg,.sel-opt .ok svg{width:16px;height:16px}
+.nav-item .count:empty{display:none}
+@media (max-width:560px){
+  .pop.sheet{left:8px!important;right:8px;top:auto!important;bottom:8px;width:auto!important;border-radius:24px;padding:18px}
+  .pop.sheet .dp{width:auto}
+  .pop.sheet .dp-day{height:44px}
+}
 
 .toast{position:fixed;bottom:24px;max-width:calc(100% - 32px);left:50%;transform:translateX(-50%);background:#1d181e;border:1px solid var(--line-2);padding:12px 20px;border-radius:999px;z-index:60;font-size:.9rem}
 
@@ -309,6 +369,8 @@ function addMonths(s, k, day) {
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 const cents = v => Math.round(Number(v) * 100);
+const fmtMoney = v => (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const parseMoney = s => Math.round(Number(String(s).replace(/\./g, '').replace(',', '.')) * 100) / 100 || 0;
 const store = {
   get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -529,12 +591,18 @@ function viewBlock() {
   </div>
   ${fixas.length ? `<section class="glass panel fixas" style="margin-top:16px">
     <div class="section-head"><h2>Contas fixas</h2><span class="muted">${brl(sum(fixas.filter(f => !f.fim)))} / mês</span></div>
-    <div class="list">${fixas.map(f => `<div class="item">
+    <div class="list">${fixas.map(f => {
+      const occ = data.despesas.filter(e => e.fixa_id === f.id);
+      const prox = occ.filter(e => !e.pago).sort(byDue)[0];
+      const ultimoPago = occ.filter(e => e.pago).sort((a, c) => c.vencimento.localeCompare(a.vencimento))[0];
+      const status = prox ? `<span>Próximo: ${fmtDate(prox.vencimento)}</span>${isOverdue(prox) ? '<span class="tag red">Vencida</span>' : ''}`
+        : ultimoPago ? `<span class="tag green">Pago em ${fmtDate(ultimoPago.data_pagamento)}</span>` : '';
+      return `<div class="item">
       <span class="fx-icon">${SVG(I.repeat)}</span>
-      <div><div class="item-name">${esc(f.nome)}</div><div class="item-sub"><span>Todo dia ${f.dia_venc}</span>${f.fim ? `<span class="tag">Encerrada</span>` : ''}</div></div>
+      <div><div class="item-name">${esc(f.nome)}</div><div class="item-sub"><span>Todo dia ${f.dia_venc}</span>${f.fim ? `<span class="tag">Encerrada</span>` : status}</div></div>
       <div class="item-amount">${brl(f.valor)}</div>
-      <div class="item-actions"><button class="icon-btn" data-edit-fixa="${f.id}" aria-label="Editar conta fixa">${SVG(I.edit)}</button></div>
-    </div>`).join('')}</div>
+      <div class="item-actions">${prox ? `<button class="btn btn-green btn-sm" data-pay="${prox.id}">Já paguei</button>` : ''}<button class="icon-btn" data-edit-fixa="${f.id}" aria-label="Editar conta fixa">${SVG(I.edit)}</button></div>
+    </div>`; }).join('')}</div>
   </section>` : ''}
   <section class="glass panel" style="margin-top:16px">
     <div class="section-head"><h2>Despesas</h2>
@@ -648,15 +716,166 @@ function bindView(root) {
   on('[data-day]', el => dayModal(el.dataset.day));
 }
 
+// ---------- Campos personalizados ----------
+// Troca os campos nativos (data, lista, número, dinheiro) por versões no estilo do app.
+// O campo original continua no formulário (escondido) e guarda o valor.
+const CHEV = '<svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>';
+const CAL_ICON = '<path d="M4 6h16v14H4z"/><path d="M4 10h16M8 3v4M16 3v4"/>';
+let popEl = null, popAnchor = null;
+
+function closePop() {
+  if (!popEl) return;
+  popEl.remove(); popEl = null;
+  if (popAnchor) { popAnchor.classList.remove('open'); popAnchor = null; }
+}
+function openPop(anchor, build) {
+  const same = popAnchor === anchor;
+  closePop();
+  if (same) return;
+  popEl = document.createElement('div');
+  popEl.className = 'pop';
+  document.body.appendChild(popEl);
+  popAnchor = anchor; anchor.classList.add('open');
+  build(popEl);
+  placePop();
+}
+function placePop() {
+  if (!popEl || !popAnchor) return;
+  const sheet = window.innerWidth <= 560;
+  popEl.classList.toggle('sheet', sheet);
+  if (sheet) return;
+  const r = popAnchor.getBoundingClientRect(), w = popEl.offsetWidth, h = popEl.offsetHeight;
+  let top = r.bottom + 8;
+  if (top + h > window.innerHeight - 8 && r.top - h - 8 > 8) top = r.top - h - 8;
+  const left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+  popEl.style.top = Math.max(8, top) + 'px'; popEl.style.left = left + 'px';
+  if (popEl.querySelector('.sel-list')) popEl.style.minWidth = r.width + 'px';
+}
+document.addEventListener('mousedown', e => { if (popEl && !popEl.contains(e.target) && !popAnchor.contains(e.target)) closePop(); });
+window.addEventListener('resize', closePop);
+document.addEventListener('scroll', e => { if (popEl && !popEl.contains(e.target)) closePop(); }, true);
+
+function fire(el) { el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }
+
+function enhance(root) {
+  root.querySelectorAll('input[type=date]').forEach(datePicker);
+  root.querySelectorAll('select').forEach(customSelect);
+  root.querySelectorAll('input.money').forEach(moneyInput);
+  root.querySelectorAll('input[data-stepper]').forEach(stepper);
+}
+
+function datePicker(input) {
+  input.classList.add('hidden');
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'field-btn';
+  input.before(btn);
+  const show = () => {
+    const v = input.value;
+    const wd = v ? new Date(v + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '') : '';
+    btn.innerHTML = `${SVG(CAL_ICON)}<span class="fb-text">${v ? fmtDate(v) : 'Escolher data'} <span class="fb-sub">${wd}</span></span>${CHEV}`;
+  };
+  show();
+  const pick = v => { input.value = v; show(); fire(input); closePop(); };
+  btn.addEventListener('click', () => openPop(btn, pop => {
+    const base = input.value || todayISO();
+    const st = { y: +base.slice(0, 4), m: +base.slice(5, 7) - 1, view: 'days' };
+    const draw = () => {
+      const title = cap(new Date(st.y, st.m, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
+      if (st.view === 'months') {
+        const months = Array.from({ length: 12 }, (_, i) => {
+          const nm = cap(new Date(2000, i, 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''));
+          const isSel = input.value && +input.value.slice(0, 4) === st.y && +input.value.slice(5, 7) - 1 === i;
+          const isCur = todayISO().slice(0, 7) === `${st.y}-${String(i + 1).padStart(2, '0')}`;
+          return `<button type="button" data-mo="${i}" class="${isSel ? 'sel' : ''} ${isCur ? 'cur' : ''}">${nm}</button>`;
+        }).join('');
+        pop.innerHTML = `<div class="dp">
+          <div class="dp-head"><button type="button" class="dp-nav" data-y="-1">${SVG(I.back)}</button>
+          <button type="button" class="dp-title" data-view="days">${st.y}</button>
+          <button type="button" class="dp-nav" data-y="1">${SVG(I.next)}</button></div>
+          <div class="dp-months">${months}</div></div>`;
+      } else {
+        const first = new Date(st.y, st.m, 1);
+        const start = new Date(st.y, st.m, 1 - first.getDay());
+        const has = new Set(data.despesas.map(e => e.vencimento));
+        let cells = '';
+        for (let i = 0; i < 42; i++) {
+          const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = iso(d);
+          const cls = ['dp-day', d.getMonth() !== st.m && 'out', k === todayISO() && 'today', k === input.value && 'sel'].filter(Boolean).join(' ');
+          cells += `<button type="button" class="${cls}" data-d="${k}">${d.getDate()}${has.has(k) ? '<i></i>' : ''}</button>`;
+        }
+        const t = todayISO();
+        const tm = new Date(); tm.setDate(tm.getDate() + 1);
+        const quick = [['Hoje', t], ['Amanhã', iso(tm)], ['+1 mês', addMonths(input.value || t, 1)]];
+        pop.innerHTML = `<div class="dp">
+          <div class="dp-head"><button type="button" class="dp-nav" data-m="-1" aria-label="Mês anterior">${SVG(I.back)}</button>
+          <button type="button" class="dp-title" data-view="months">${title} ${CHEV}</button>
+          <button type="button" class="dp-nav" data-m="1" aria-label="Próximo mês">${SVG(I.next)}</button></div>
+          <div class="dp-grid">${['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => `<div class="dp-dow">${d}</div>`).join('')}${cells}</div>
+          <div class="dp-foot">${quick.map(([l, v]) => `<button type="button" class="pill" data-d="${v}">${l}</button>`).join('')}</div></div>`;
+      }
+      pop.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => pick(b.dataset.d)));
+      pop.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { const d = new Date(st.y, st.m + +b.dataset.m, 1); st.y = d.getFullYear(); st.m = d.getMonth(); draw(); }));
+      pop.querySelectorAll('[data-y]').forEach(b => b.addEventListener('click', () => { st.y += +b.dataset.y; draw(); }));
+      pop.querySelectorAll('[data-mo]').forEach(b => b.addEventListener('click', () => { st.m = +b.dataset.mo; st.view = 'days'; draw(); }));
+      pop.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { st.view = b.dataset.view; draw(); }));
+      placePop();
+    };
+    draw();
+  }));
+}
+
+function customSelect(select) {
+  select.classList.add('hidden');
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'field-btn';
+  select.before(btn);
+  const icon = o => o && o.dataset.icon ? SVG(ICONS[o.dataset.icon] || ICONS.wallet) : '';
+  const show = () => { const o = select.selectedOptions[0]; btn.innerHTML = `${icon(o)}<span class="fb-text">${o ? esc(o.textContent) : ''}</span>${CHEV}`; };
+  show();
+  btn.addEventListener('click', () => openPop(btn, pop => {
+    pop.innerHTML = `<div class="sel-list">${[...select.options].map(o => `
+      <button type="button" class="sel-opt ${o.value === select.value ? 'sel' : ''}" data-v="${esc(o.value)}">
+        ${o.dataset.icon ? `<span class="oi">${icon(o)}</span>` : ''}<span>${esc(o.textContent)}</span><span class="ok">${SVG(I.check)}</span>
+      </button>`).join('')}</div>`;
+    pop.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => {
+      select.value = b.dataset.v; show(); fire(select); closePop();
+    }));
+  }));
+}
+
+// digitação estilo caixa: só números, as duas últimas casas viram centavos
+function moneyInput(input) {
+  input.setAttribute('inputmode', 'numeric'); input.autocomplete = 'off';
+  const wrap = document.createElement('div'); wrap.className = 'money-wrap';
+  input.before(wrap); wrap.append(Object.assign(document.createElement('span'), { textContent: 'R$' }), input);
+  input.addEventListener('input', () => {
+    const digits = input.value.replace(/\D/g, '').replace(/^0+/, '').slice(0, 11);
+    input.value = digits ? fmtMoney(Number(digits) / 100) : '';
+  });
+}
+
+function stepper(input) {
+  const wrap = document.createElement('div'); wrap.className = 'stepper';
+  input.before(wrap);
+  const mk = (t, d) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.setAttribute('aria-label', d > 0 ? 'Aumentar' : 'Diminuir');
+    b.addEventListener('click', () => {
+      const min = +input.min, max = +input.max, v = (parseInt(input.value) || 0) + d;
+      input.value = Math.min(max, Math.max(min, v)); fire(input);
+    }); return b; };
+  wrap.append(mk('−', -1), input, mk('+', 1));
+}
+
 // ---------- Modais ----------
 function openModal(html, wide = false) {
   $('#modalCard').className = 'modal-card glass' + (wide ? ' wide' : '');
+  closePop();
   $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden');
-  const f = $('#modalCard input:not([type=checkbox])'); if (f && !wide) setTimeout(() => f.focus(), 50);
+  enhance($('#modalCard'));
+  const f = $('#modalCard input:not([type=checkbox]):not([type=date])'); if (f && !wide) setTimeout(() => f.focus(), 50);
 }
-function closeModal() { $('#modal').classList.add('hidden'); $('#modalCard').innerHTML = ''; }
+function closeModal() { closePop(); $('#modal').classList.add('hidden'); $('#modalCard').innerHTML = ''; }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (popEl) closePop(); else closeModal(); } });
 const bindClose = () => $('#modalCard').querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeModal));
 
 function dayModal(day) {
@@ -716,7 +935,7 @@ function expenseModal(id, opts = {}) {
     bloco_id: opts.blockId || data.blocos[0].id, tipo: 'avulsa'
   };
   let tipo = e.tipo;
-  const blockSelect = `<label>Bloco<select id="eBlock">${data.blocos.map(b => `<option value="${b.id}" ${b.id === e.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>`;
+  const blockSelect = `<label>Bloco<select id="eBlock">${data.blocos.map(b => `<option value="${b.id}" data-icon="${b.icone}" ${b.id === e.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>`;
   openModal(`
     <h3>${id ? 'Editar despesa' : 'Nova despesa'}</h3>
     <form id="expForm" style="display:flex;flex-direction:column;gap:14px">
@@ -729,15 +948,15 @@ function expenseModal(id, opts = {}) {
               </div>`}
       <label>Nome da dívida<input id="eName" value="${esc(e.nome)}" placeholder="Ex.: Conta de luz" required maxlength="60"></label>
       <div class="row">
-        <label><span id="lblValor">Valor (R$)</span><input id="eAmount" type="number" inputmode="decimal" step="0.01" min="0" value="${e.valor}" placeholder="0,00" required></label>
-        <label><span id="lblDue">Vencimento</span><input id="eDue" type="date" value="${e.vencimento}" required></label>
+        <label><span id="lblValor">Valor (R$)</span><input id="eAmount" class="money" value="${e.valor === '' ? '' : fmtMoney(e.valor)}" placeholder="0,00" required></label>
+        <label><span id="lblDue">Vencimento</span><input id="eDue" type="date" value="${e.vencimento}"></label>
       </div>
       <div id="parcBox" class="hidden" style="display:flex;flex-direction:column;gap:14px">
         <div class="row">
-          <label>Nº de parcelas<input id="eParc" type="number" min="2" max="120" step="1" value="2"></label>
-          <label>O valor digitado é<select id="eModo"><option value="parcela">Valor de cada parcela</option><option value="total">Valor total</option></select></label>
+          <label>Nº de parcelas<input id="eParc" type="number" min="2" max="120" step="1" value="2" data-stepper></label>
+          <label>O valor digitado é<select id="eModo"><option value="parcela">Cada parcela</option><option value="total">Total da compra</option></select></label>
         </div>
-        <label>Parcelas já pagas<input id="eJaPagas" type="number" min="0" max="119" step="1" value="0"></label>
+        <label>Parcelas já pagas<input id="eJaPagas" type="number" min="0" max="119" step="1" value="0" data-stepper></label>
         <div class="hint" id="parcResumo"></div>
       </div>
       <div id="fixaBox" class="hint hidden">Vai ser lançada automaticamente todo mês no mesmo dia, a partir da data escolhida.</div>
@@ -757,7 +976,7 @@ function expenseModal(id, opts = {}) {
 
   const resumo = () => {
     const n = Math.max(2, parseInt($('#eParc').value) || 2);
-    const v = parseFloat($('#eAmount').value) || 0;
+    const v = parseMoney($('#eAmount').value);
     const parcela = $('#eModo').value === 'total' ? v / n : v;
     const ult = addMonths($('#eDue').value || todayISO(), n - 1);
     $('#parcResumo').textContent = `${n}x de ${brl(parcela)} = ${brl(parcela * n)} · última em ${fmtDate(ult)}`;
@@ -773,14 +992,16 @@ function expenseModal(id, opts = {}) {
     if (t === 'parcelada' && !id) resumo();
   };
   document.querySelectorAll('#tipoSeg button').forEach(b => b.addEventListener('click', () => setTipo(b.dataset.t)));
-  ['#eParc', '#eModo', '#eAmount', '#eDue'].forEach(s => $(s).addEventListener('input', () => tipo === 'parcelada' && !id && resumo()));
+  ['#eParc', '#eModo', '#eAmount', '#eDue', '#eJaPagas'].forEach(s => $(s).addEventListener('input', () => tipo === 'parcelada' && !id && resumo()));
   $('#ePaid').addEventListener('change', ev => $('#ePaidWrap').classList.toggle('hidden', !ev.target.checked));
   setTipo(tipo);
 
   $('#expForm').addEventListener('submit', ev => {
     ev.preventDefault();
     const nome = $('#eName').value.trim();
-    const valor = Math.round((parseFloat($('#eAmount').value) || 0) * 100) / 100;
+    const valor = parseMoney($('#eAmount').value);
+    if (!nome) return toast('Digite o nome da dívida');
+    if (!(valor > 0)) return toast('Digite o valor');
     const due = $('#eDue').value, bloco_id = $('#eBlock').value;
     const pago = $('#ePaid').checked, data_pagamento = pago ? ($('#ePaidDate').value || todayISO()) : null;
 
@@ -823,10 +1044,10 @@ function fixaModal(fid) {
     <form id="fixaForm" style="display:flex;flex-direction:column;gap:14px">
       <label>Nome<input id="fName" value="${esc(f.nome)}" required maxlength="60"></label>
       <div class="row">
-        <label>Valor mensal (R$)<input id="fValor" type="number" step="0.01" min="0" value="${f.valor}" required></label>
-        <label>Dia do vencimento<input id="fDia" type="number" min="1" max="31" value="${f.dia_venc}" required></label>
+        <label>Valor mensal (R$)<input id="fValor" class="money" value="${fmtMoney(f.valor)}" required></label>
+        <label>Dia do vencimento<input id="fDia" type="number" min="1" max="31" step="1" value="${f.dia_venc}" data-stepper></label>
       </div>
-      <label>Bloco<select id="fBlock">${data.blocos.map(b => `<option value="${b.id}" ${b.id === f.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>
+      <label>Bloco<select id="fBlock">${data.blocos.map(b => `<option value="${b.id}" data-icon="${b.icone}" ${b.id === f.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>
       ${f.fim ? `<div class="hint">Encerrada: último mês ${fmtDate(f.fim).slice(3)}</div>` : ''}
       <div class="modal-actions">
         ${f.fim ? `<button type="button" class="btn" id="fReativar" style="margin-right:auto">Reativar</button>`
@@ -838,7 +1059,7 @@ function fixaModal(fid) {
   bindClose();
   $('#fixaForm').addEventListener('submit', ev => {
     ev.preventDefault();
-    const nome = $('#fName').value.trim(), valor = Math.round(parseFloat($('#fValor').value) * 100) / 100 || 0;
+    const nome = $('#fName').value.trim(), valor = parseMoney($('#fValor').value);
     const dia_venc = Math.min(31, Math.max(1, parseInt($('#fDia').value) || 1)), bloco_id = $('#fBlock').value;
     mutate(async () => {
       await db(sb.from('desp_fixas').update({ nome, valor, dia_venc, bloco_id }).eq('id', fid));
@@ -866,7 +1087,7 @@ function payModal(id) {
     <h3>Marcar como pago</h3>
     <p class="muted">${esc(e.nome)} ${e.tipo === 'parcelada' ? `(${e.parcela_num}/${e.parcela_total})` : ''} · ${brl(e.valor)}</p>
     <form id="payForm" style="display:flex;flex-direction:column;gap:14px">
-      <label>Data do pagamento<input id="pDate" type="date" value="${todayISO()}" required></label>
+      <label>Data do pagamento<input id="pDate" type="date" value="${todayISO()}"></label>
       <div class="modal-actions">
         <button type="button" class="btn" data-close>Cancelar</button>
         <button class="btn btn-green">${SVG(I.check)} Já paguei</button>
