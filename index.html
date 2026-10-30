@@ -25,7 +25,7 @@ body{
 }
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0}
-svg:not(.chart){width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .hidden{display:none!important}
 .muted{color:var(--muted);font-size:.9rem}
 .accent{color:var(--accent)}
@@ -131,15 +131,38 @@ input[type=date]{color-scheme:dark}
 .item-actions .icon-btn svg{width:17px;height:17px}
 .empty{text-align:center;padding:40px 16px;color:var(--muted)}
 .month-group{margin-top:10px}
-.month-head{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;padding:10px 12px 6px;text-transform:capitalize}
+.month-head{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;padding:10px 12px 6px}
 
-/* Gráfico */
-.chart-wrap{position:relative}
-.chart{width:100%;height:220px;display:block;overflow:visible}
-.chart circle{fill:#f6c8e4;stroke:#e3a9cf}
-.chart text{fill:var(--muted);font-size:11px;font-family:Outfit,sans-serif}
-.chart-tip{position:absolute;pointer-events:none;background:#1d181e;border:1px solid var(--line-2);border-radius:12px;padding:8px 12px;font-size:.85rem;transform:translate(-50%,-115%);white-space:nowrap}
-.chart-tip small{display:block;color:var(--muted);font-size:.75rem}
+/* Calendário */
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-title{min-width:150px;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal-dow{text-align:center;font-size:.75rem;color:var(--muted);padding:2px 0 4px;text-transform:capitalize}
+.cal-day{min-height:84px;border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:5px;text-align:left;transition:.2s;background:rgba(255,255,255,.015);min-width:0}
+.cal-day:hover{border-color:var(--accent-2);background:rgba(227,169,207,.05)}
+.cal-day.out{opacity:.3}
+.cal-day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.cal-day.over{background:var(--red-bg)}
+.cal-day.done{background:var(--green-bg)}
+.cal-day .n{font-size:.85rem}
+.cal-day .amt{font-size:.72rem;color:#cfc3cc;margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:3px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.dot.g{background:var(--green)}.dot.r{background:var(--red)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:14px}
+.legend span{display:flex;align-items:center;gap:6px}
+.modal-card.wide{max-width:600px}
+.modal-card .item{padding:12px 6px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#0e0c0f;border:1px solid var(--line-2);border-radius:999px;padding:4px}
+.seg button{padding:8px 6px;border-radius:999px;font-size:.88rem;color:var(--muted);transition:.2s}
+.seg button.active{background:linear-gradient(90deg,#7a4d6a,#3d2836);color:#fff}
+.hint{font-size:.8rem;color:var(--muted);background:rgba(227,169,207,.06);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.loading{position:fixed;inset:0;display:grid;place-items:center;z-index:70;background:rgba(5,4,6,.55)}
+.spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--line-2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fixas .item{grid-template-columns:auto 1fr auto auto}
+.fx-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(227,169,207,.1);color:var(--accent)}
+.fx-icon svg{width:16px;height:16px}
 
 .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px}
 .back:hover{color:var(--accent)}
@@ -177,6 +200,11 @@ input[type=date]{color-scheme:dark}
   .item{grid-template-columns:auto 1fr auto;padding:12px 6px;gap:10px}
   .item-actions{grid-column:2/-1;justify-content:flex-end;margin-top:-6px}
   .row{grid-template-columns:1fr}
+  .cal{gap:4px}
+  .cal-day{min-height:54px;padding:6px 5px;border-radius:10px}
+  .cal-day .amt{display:none}
+  .dot{width:6px;height:6px}
+  .panel{padding:18px 14px}
   .fab{display:flex!important}
   .toast{bottom:100px}
 }
@@ -229,12 +257,16 @@ input[type=date]{color-scheme:dark}
 <div id="modal" class="modal hidden"><div class="modal-card glass" id="modalCard"></div></div>
 <div id="toast" class="toast hidden"></div>
 
+<div id="loading" class="loading hidden"><div class="spinner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-// ---------- Usuários ----------
-const USERS = {
-  renan:    { pass: 'ref12345', name: 'Renan' },
-  jhennifer:{ pass: 'jhe12345', name: 'Jhennifer' }
-};
+// ---------- Supabase ----------
+const SUPABASE_URL = 'https://xraygbmishqxyrtiwyxy.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyYXlnYm1pc2hxeHlydGl3eXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MjU0NTUsImV4cCI6MjEwNTUwMTQ1NX0.MSznUZ4w8ZW8y4PTjbQmQiT8BEDhnA3enDs6quIk6OI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// login digitado (renan / jhennifer) vira o e-mail cadastrado no Supabase
+const EMAIL_DOMAIN = '@despesas.app';
 
 // ---------- Ícones dos blocos ----------
 const ICONS = {
@@ -254,49 +286,73 @@ const I = {
   check:'<path d="m5 12 5 5 9-10"/>',
   edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
   trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
-  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
   back:'<path d="m15 18-6-6 6-6"/>',
-  dots:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
+  next:'<path d="m9 18 6-6-6-6"/>',
+  dots:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  repeat:'<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>'
 };
 
 // ---------- Utilidades ----------
 const $ = s => document.querySelector(s);
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const brl = v => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-const todayISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
-const fmtDate = iso => iso ? iso.split('-').reverse().join('/') : '—';
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const todayISO = () => iso(new Date());
+const fmtDate = s => s ? s.split('-').reverse().join('/') : '—';
+const monthStart = s => s.slice(0, 7) + '-01';
+// soma k meses a uma data mantendo o dia (limitado ao fim do mês)
+function addMonths(s, k, day) {
+  const [y, m, d] = s.split('-').map(Number);
+  const first = new Date(y, m - 1 + k, 1);
+  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  return iso(new Date(first.getFullYear(), first.getMonth(), Math.min(day || d, last)));
+}
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const cents = v => Math.round(Number(v) * 100);
 const store = {
   get(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  del(k) { try { localStorage.removeItem(k); } catch {} }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 
 // ---------- Estado ----------
-let user = null;
-let data = { blocks: [], expenses: [] };
+let me = null;           // { id, nome }
+let membros = {};        // user_id -> nome
+let data = { blocos: [], fixas: [], despesas: [] };
 let route = { view: 'dashboard', blockId: null, filter: 'all' };
+let calMonth = monthStart(todayISO());
 
-const dataKey = () => 'despesas_data_' + user;
-function load() {
-  data = store.get(dataKey(), null);
-  if (!data) {
-    // blocos iniciais de exemplo
-    data = { blocks: [
-      { id: uid(), name: 'Casa', icon: 'home' },
-      { id: uid(), name: 'Cartão de crédito', icon: 'card' },
-      { id: uid(), name: 'Carro', icon: 'car' }
-    ], expenses: [] };
-    save();
-  }
+const blockById = id => data.blocos.find(b => b.id === id);
+const fixaById = id => data.fixas.find(f => f.id === id);
+const despById = id => data.despesas.find(e => e.id === id);
+const expensesOf = id => data.despesas.filter(e => e.bloco_id === id);
+const isOverdue = e => !e.pago && e.vencimento < todayISO();
+const sum = arr => arr.reduce((t, e) => t + Number(e.valor || 0), 0);
+const byDue = (a, b) => a.vencimento.localeCompare(b.vencimento) || (a.parcela_num || 0) - (b.parcela_num || 0);
+
+// ---------- Acesso ao banco ----------
+let busy = 0;
+function loading(on) { busy += on ? 1 : -1; $('#loading').classList.toggle('hidden', busy <= 0); }
+async function db(promise) {
+  const { data: d, error } = await promise;
+  if (error) throw error;
+  return d;
 }
-function save() { store.set(dataKey(), data); }
-
-const blockById = id => data.blocks.find(b => b.id === id);
-const expensesOf = id => data.expenses.filter(e => e.blockId === id);
-const isOverdue = e => !e.paid && e.dueDate && e.dueDate < todayISO();
-const sum = arr => arr.reduce((t, e) => t + Number(e.amount || 0), 0);
-const byDue = (a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999');
+// executa uma alteração, recarrega tudo e redesenha a tela
+async function mutate(fn, okMsg) {
+  loading(true);
+  try { await fn(); await refresh(); closeModal(); render(); if (okMsg) toast(okMsg); }
+  catch (err) { console.error(err); toast('Erro: ' + (err.message || 'não foi possível salvar')); }
+  finally { loading(false); }
+}
+async function refresh() {
+  await db(sb.rpc('desp_gerar_fixas'));
+  const [blocos, fixas, despesas] = await Promise.all([
+    db(sb.from('desp_blocos').select('*').order('criado_em')),
+    db(sb.from('desp_fixas').select('*').order('nome')),
+    db(sb.from('desp_despesas').select('*').order('vencimento'))
+  ]);
+  data = { blocos, fixas, despesas };
+}
 
 // ---------- Login ----------
 function showLogin() {
@@ -304,34 +360,46 @@ function showLogin() {
   $('#login').classList.remove('hidden');
   $('#loginUser').focus();
 }
-function startApp() {
-  load();
-  const name = USERS[user].name;
-  $('#userName').textContent = name;
-  $('#userName2').textContent = name;
-  $('#avatar').textContent = name[0];
+async function startApp(user) {
+  loading(true);
+  try {
+    const lista = await db(sb.from('desp_membros').select('user_id, nome'));
+    membros = Object.fromEntries(lista.map(m => [m.user_id, m.nome]));
+    if (!membros[user.id]) { await sb.auth.signOut(); showLogin(); toast('Usuário sem acesso a este app'); return; }
+    me = { id: user.id, nome: membros[user.id] };
+    await refresh();
+  } catch (err) { console.error(err); toast('Erro ao carregar: ' + err.message); showLogin(); return; }
+  finally { loading(false); }
+  $('#userName').textContent = me.nome;
+  $('#userName2').textContent = me.nome;
+  $('#avatar').textContent = me.nome[0];
   $('#todayLabel').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
   $('#login').classList.add('hidden');
   $('#app').classList.remove('hidden');
   go('dashboard');
 }
-$('#loginForm').addEventListener('submit', e => {
+$('#loginForm').addEventListener('submit', async e => {
   e.preventDefault();
   const u = $('#loginUser').value.trim().toLowerCase();
-  const p = $('#loginPass').value;
-  if (USERS[u] && USERS[u].pass === p) {
-    user = u; store.set('despesas_session', u);
-    $('#loginError').classList.add('hidden'); $('#loginPass').value = '';
-    startApp();
-  } else {
-    $('#loginError').classList.remove('hidden');
-  }
+  const btn = $('#loginForm button'); btn.disabled = true;
+  loading(true);
+  const { data: res, error } = await sb.auth.signInWithPassword({ email: u.includes('@') ? u : u + EMAIL_DOMAIN, password: $('#loginPass').value });
+  loading(false); btn.disabled = false;
+  if (error) { $('#loginError').classList.remove('hidden'); return; }
+  $('#loginError').classList.add('hidden'); $('#loginPass').value = '';
+  startApp(res.user);
 });
-$('#logoutBtn').addEventListener('click', () => { store.del('despesas_session'); user = null; showLogin(); });
+$('#logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); me = null; showLogin(); });
+
+// atualiza ao voltar para o app (ex.: a outra pessoa lançou algo)
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible' || !me || !$('#modal').classList.contains('hidden')) return;
+  try { await refresh(); render(); } catch {}
+});
 
 // ---------- Navegação ----------
 document.querySelectorAll('.nav-item[data-view]').forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
-document.querySelectorAll('[data-action="new-expense"]').forEach(b => b.addEventListener('click', () => expenseModal(null, route.view === 'block' ? route.blockId : null)));
+document.querySelectorAll('[data-action="new-expense"]').forEach(b => b.addEventListener('click', () => expenseModal(null, { blockId: route.view === 'block' ? route.blockId : null })));
 
 function go(view, blockId = null) {
   route = { view, blockId, filter: 'all' };
@@ -342,48 +410,47 @@ function go(view, blockId = null) {
 function render() {
   document.querySelectorAll('.nav-item[data-view]').forEach(b =>
     b.classList.toggle('active', b.dataset.view === route.view || (route.view === 'block' && b.dataset.view === 'dashboard')));
-  const pending = data.expenses.filter(e => !e.paid).length;
-  const paid = data.expenses.filter(e => e.paid).length;
-  $('#countDebts').textContent = pending || '';
-  $('#countPaid').textContent = paid || '';
+  $('#countDebts').textContent = data.despesas.filter(e => !e.pago).length || '';
+  $('#countPaid').textContent = data.despesas.filter(e => e.pago).length || '';
   const v = $('#view');
+  if (route.view === 'block' && !blockById(route.blockId)) route.view = 'dashboard';
   if (route.view === 'dashboard') v.innerHTML = viewDashboard();
   else if (route.view === 'block') v.innerHTML = viewBlock();
   else if (route.view === 'debts') v.innerHTML = viewDebts();
   else if (route.view === 'paid') v.innerHTML = viewPaid();
-  bindView();
+  bindView(v);
 }
 
 // ---------- Views ----------
+const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+
 function viewDashboard() {
-  const pend = data.expenses.filter(e => !e.paid);
-  const paid = data.expenses.filter(e => e.paid);
+  const pend = data.despesas.filter(e => !e.pago);
   const over = pend.filter(isOverdue);
   const month = todayISO().slice(0, 7);
-  const paidMonth = paid.filter(e => (e.paidDate || '').startsWith(month));
+  const paidMonth = data.despesas.filter(e => e.pago && (e.data_pagamento || '').startsWith(month));
 
-  const blocks = data.blocks.map(b => {
+  const blocks = data.blocos.map(b => {
     const ex = expensesOf(b.id);
-    const open = sum(ex.filter(e => !e.paid));
-    const total = sum(ex);
-    const pct = total ? Math.round(sum(ex.filter(e => e.paid)) / total * 100) : 0;
-    const nPend = ex.filter(e => !e.paid).length;
+    const total = sum(ex), pago = sum(ex.filter(e => e.pago));
+    const pct = total ? Math.round(pago / total * 100) : 0;
+    const nPend = ex.filter(e => !e.pago).length;
     return `<div class="block" data-open-block="${b.id}" role="button" tabindex="0">
       <div class="block-top">
-        <div class="block-icon">${SVG(ICONS[b.icon] || ICONS.wallet)}</div>
+        <div class="block-icon">${SVG(ICONS[b.icone] || ICONS.wallet)}</div>
         <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco" style="width:34px;height:34px">${SVG(I.dots)}</button>
       </div>
-      <div><div class="block-name">${esc(b.name)}</div><div class="muted" style="font-size:.8rem">Em aberto</div></div>
-      <div class="block-amount">${brl(open)}</div>
+      <div><div class="block-name">${esc(b.nome)}</div><div class="muted" style="font-size:.8rem">Em aberto</div></div>
+      <div class="block-amount">${brl(total - pago)}</div>
       <div class="progress"><i style="width:${pct}%"></i></div>
-      <div class="block-meta"><span>${nPend} pendente${nPend === 1 ? '' : 's'}</span><span>${pct}% pago</span></div>
+      <div class="block-meta"><span>${plural(nPend, 'pendente', 'pendentes')}</span><span>${pct}% pago</span></div>
     </div>`;
   }).join('');
 
   return `
   <div class="grid stats">
-    <div class="glass stat glow"><div class="label">Total em aberto</div><div class="value">${brl(sum(pend))}</div><div class="sub">${pend.length} dívida${pend.length === 1 ? '' : 's'} pendente${pend.length === 1 ? '' : 's'}</div></div>
-    <div class="glass stat"><div class="label">Pago este mês</div><div class="value" style="color:var(--green)">${brl(sum(paidMonth))}</div><div class="sub">${paidMonth.length} pagamento${paidMonth.length === 1 ? '' : 's'}</div></div>
+    <div class="glass stat glow"><div class="label">Total em aberto</div><div class="value">${brl(sum(pend))}</div><div class="sub">${plural(pend.length, 'dívida pendente', 'dívidas pendentes')}</div></div>
+    <div class="glass stat"><div class="label">Pago este mês</div><div class="value" style="color:var(--green)">${brl(sum(paidMonth))}</div><div class="sub">${plural(paidMonth.length, 'pagamento', 'pagamentos')}</div></div>
     <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
   </div>
 
@@ -395,10 +462,42 @@ function viewDashboard() {
     </div>
   </section>
 
-  <section class="glass panel" style="margin-top:16px">
-    <div class="section-head"><h2>Pagamentos por mês</h2><span class="pill active">12 meses</span></div>
-    ${chart()}
-  </section>`;
+  <section class="glass panel" style="margin-top:16px">${calendar()}</section>`;
+}
+
+function calendar() {
+  const [y, m] = calMonth.split('-').map(Number);
+  const first = new Date(y, m - 1, 1);
+  const start = new Date(y, m - 1, 1 - first.getDay());   // domingo antes do dia 1
+  const title = cap(first.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
+  const today = todayISO();
+  const byDay = {};
+  data.despesas.forEach(e => (byDay[e.vencimento] = byDay[e.vencimento] || []).push(e));
+  const monthItems = data.despesas.filter(e => e.vencimento.startsWith(calMonth.slice(0, 7)));
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    if (i >= 35 && d.getMonth() !== m - 1) break;
+    const key = iso(d), items = byDay[key] || [];
+    const pend = items.filter(e => !e.pago);
+    const cls = ['cal-day', d.getMonth() !== m - 1 && 'out', key === today && 'today',
+      pend.some(isOverdue) && 'over', items.length && !pend.length && 'done'].filter(Boolean).join(' ');
+    const dots = items.slice(0, 6).map(e => `<i class="dot ${e.pago ? 'g' : isOverdue(e) ? 'r' : ''}"></i>`).join('');
+    cells.push(`<button class="${cls}" data-day="${key}" aria-label="${fmtDate(key)}"><span class="n">${d.getDate()}</span><span class="dots">${dots}</span>${items.length ? `<span class="amt">${brl(sum(items))}</span>` : ''}</button>`);
+  }
+  const dows = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  return `
+    <div class="section-head"><h2>Calendário</h2>
+      <div class="cal-nav">
+        <button class="icon-btn" data-cal="-1" aria-label="Mês anterior">${SVG(I.back)}</button>
+        <span class="cal-title">${title}</span>
+        <button class="icon-btn" data-cal="1" aria-label="Próximo mês">${SVG(I.next)}</button>
+        <button class="btn btn-sm" data-cal="0">Hoje</button>
+      </div>
+    </div>
+    <p class="muted" style="margin:-8px 0 12px">No mês: ${brl(sum(monthItems))} · pago ${brl(sum(monthItems.filter(e => e.pago)))}</p>
+    <div class="cal">${dows}${cells.join('')}</div>
+    <div class="legend"><span><i class="dot"></i> A pagar</span><span><i class="dot g"></i> Pago</span><span><i class="dot r"></i> Vencido</span></div>`;
 }
 
 function filterPills() {
@@ -412,21 +511,31 @@ function filterPills() {
 
 function viewBlock() {
   const b = blockById(route.blockId);
-  if (!b) { route.view = 'dashboard'; return viewDashboard(); }
-  let ex = expensesOf(b.id);
-  const open = sum(ex.filter(e => !e.paid)), paid = sum(ex.filter(e => e.paid));
-  if (route.filter === 'open') ex = ex.filter(e => !e.paid);
-  if (route.filter === 'paid') ex = ex.filter(e => e.paid);
-  ex.sort((a, b) => (a.paid - b.paid) || byDue(a, b));
+  const all = expensesOf(b.id);
+  let ex = all;
+  const open = sum(all.filter(e => !e.pago)), paid = sum(all.filter(e => e.pago));
+  if (route.filter === 'open') ex = ex.filter(e => !e.pago);
+  if (route.filter === 'paid') ex = ex.filter(e => e.pago);
+  ex = [...ex].sort((a, c) => (a.pago - c.pago) || byDue(a, c));
+  const fixas = data.fixas.filter(f => f.bloco_id === b.id);
   return `
   <button class="back" data-go="dashboard">${SVG(I.back)} Voltar aos blocos</button>
   <div class="grid stats">
-    <div class="glass stat glow"><div class="label"><span style="display:flex;gap:10px;align-items:center">${SVG(ICONS[b.icon] || ICONS.wallet)} ${esc(b.name)}</span>
+    <div class="glass stat glow"><div class="label"><span style="display:flex;gap:10px;align-items:center">${SVG(ICONS[b.icone] || ICONS.wallet)} ${esc(b.nome)}</span>
       <button class="icon-btn" data-edit-block="${b.id}" aria-label="Editar bloco">${SVG(I.edit)}</button></div>
       <div class="value">${brl(open)}</div><div class="sub">em aberto</div></div>
-    <div class="glass stat"><div class="label">Já pago</div><div class="value" style="color:var(--green)">${brl(paid)}</div><div class="sub">${expensesOf(b.id).filter(e => e.paid).length} pagas</div></div>
-    <div class="glass stat"><div class="label">Total do bloco</div><div class="value">${brl(open + paid)}</div><div class="sub">${expensesOf(b.id).length} lançamentos</div></div>
+    <div class="glass stat"><div class="label">Já pago</div><div class="value" style="color:var(--green)">${brl(paid)}</div><div class="sub">${plural(all.filter(e => e.pago).length, 'paga', 'pagas')}</div></div>
+    <div class="glass stat"><div class="label">Total do bloco</div><div class="value">${brl(open + paid)}</div><div class="sub">${plural(all.length, 'lançamento', 'lançamentos')}</div></div>
   </div>
+  ${fixas.length ? `<section class="glass panel fixas" style="margin-top:16px">
+    <div class="section-head"><h2>Contas fixas</h2><span class="muted">${brl(sum(fixas.filter(f => !f.fim)))} / mês</span></div>
+    <div class="list">${fixas.map(f => `<div class="item">
+      <span class="fx-icon">${SVG(I.repeat)}</span>
+      <div><div class="item-name">${esc(f.nome)}</div><div class="item-sub"><span>Todo dia ${f.dia_venc}</span>${f.fim ? `<span class="tag">Encerrada</span>` : ''}</div></div>
+      <div class="item-amount">${brl(f.valor)}</div>
+      <div class="item-actions"><button class="icon-btn" data-edit-fixa="${f.id}" aria-label="Editar conta fixa">${SVG(I.edit)}</button></div>
+    </div>`).join('')}</div>
+  </section>` : ''}
   <section class="glass panel" style="margin-top:16px">
     <div class="section-head"><h2>Despesas</h2>
       <div style="display:flex;gap:10px;flex-wrap:wrap">${filterPills()}<button class="btn btn-primary btn-sm" data-add-in="${b.id}">+ Lançar despesa</button></div>
@@ -435,69 +544,74 @@ function viewBlock() {
   </section>`;
 }
 
-function viewDebts() {
-  let ex = data.expenses.filter(e => !e.paid);
-  const total = sum(ex);
-  const over = ex.filter(isOverdue);
+function blockPills() {
   const bf = route.filter;
-  if (bf !== 'all') ex = ex.filter(e => e.blockId === bf);
-  ex.sort(byDue);
-  const pills = `<div class="pills"><button class="pill ${bf === 'all' ? 'active' : ''}" data-filter="all">Todos</button>${
-    data.blocks.map(b => `<button class="pill ${bf === b.id ? 'active' : ''}" data-filter="${b.id}">${esc(b.name)}</button>`).join('')}</div>`;
+  return `<div class="pills"><button class="pill ${bf === 'all' ? 'active' : ''}" data-filter="all">Todos</button>${
+    data.blocos.map(b => `<button class="pill ${bf === b.id ? 'active' : ''}" data-filter="${b.id}">${esc(b.nome)}</button>`).join('')}</div>`;
+}
+
+function viewDebts() {
+  const allPend = data.despesas.filter(e => !e.pago);
+  const over = allPend.filter(isOverdue);
+  let ex = route.filter === 'all' ? allPend : allPend.filter(e => e.bloco_id === route.filter);
+  ex = [...ex].sort(byDue);
   return `
-  <div class="grid stats" style="grid-template-columns:1fr 1fr">
-    <div class="glass stat glow"><div class="label">Todas as dívidas</div><div class="value">${brl(total)}</div><div class="sub">${data.expenses.filter(e => !e.paid).length} pendentes</div></div>
+  <div class="grid stats" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="glass stat glow"><div class="label">Todas as dívidas</div><div class="value">${brl(sum(allPend))}</div><div class="sub">${plural(allPend.length, 'pendente', 'pendentes')}</div></div>
     <div class="glass stat"><div class="label">Vencidas</div><div class="value" style="color:${over.length ? 'var(--red)' : 'var(--text)'}">${brl(sum(over))}</div><div class="sub">${over.length} em atraso</div></div>
   </div>
   <section class="glass panel" style="margin-top:16px">
-    <div class="section-head"><h2>Dívidas pendentes</h2>${pills}</div>
-    ${bf !== 'all' ? `<p class="muted" style="margin:-6px 0 10px">Subtotal: ${brl(sum(ex))}</p>` : ''}
+    <div class="section-head"><h2>Dívidas pendentes</h2>${blockPills()}</div>
+    ${route.filter !== 'all' ? `<p class="muted" style="margin:-6px 0 10px">Subtotal: ${brl(sum(ex))}</p>` : ''}
     ${list(ex, true)}
   </section>`;
 }
 
 function viewPaid() {
-  let ex = data.expenses.filter(e => e.paid);
-  const total = sum(ex);
-  const bf = route.filter;
-  if (bf !== 'all') ex = ex.filter(e => e.blockId === bf);
-  ex.sort((a, b) => (b.paidDate || '').localeCompare(a.paidDate || ''));
+  const allPaid = data.despesas.filter(e => e.pago);
+  let ex = route.filter === 'all' ? allPaid : allPaid.filter(e => e.bloco_id === route.filter);
+  ex = [...ex].sort((a, b) => (b.data_pagamento || '').localeCompare(a.data_pagamento || ''));
   const groups = {};
-  ex.forEach(e => { const k = (e.paidDate || '0000-00').slice(0, 7); (groups[k] = groups[k] || []).push(e); });
-  const pills = `<div class="pills"><button class="pill ${bf === 'all' ? 'active' : ''}" data-filter="all">Todos</button>${
-    data.blocks.map(b => `<button class="pill ${bf === b.id ? 'active' : ''}" data-filter="${b.id}">${esc(b.name)}</button>`).join('')}</div>`;
+  ex.forEach(e => { const k = (e.data_pagamento || '0000-00').slice(0, 7); (groups[k] = groups[k] || []).push(e); });
   const body = ex.length ? Object.keys(groups).map(k => {
     const [y, m] = k.split('-');
-    const label = k === '0000-00' ? 'Sem data' : new Date(+y, +m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const label = k === '0000-00' ? 'Sem data' : cap(new Date(+y, +m - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }));
     return `<div class="month-group"><div class="month-head"><span>${label}</span><span style="color:var(--green)">${brl(sum(groups[k]))}</span></div>${list(groups[k], true, true)}</div>`;
   }).join('') : list([], true);
+  const last = [...allPaid].sort((a, b) => (b.data_pagamento || '').localeCompare(a.data_pagamento || ''))[0];
   return `
-  <div class="grid stats" style="grid-template-columns:1fr 1fr">
-    <div class="glass stat glow"><div class="label">Total já pago</div><div class="value" style="color:var(--green)">${brl(total)}</div><div class="sub">${data.expenses.filter(e => e.paid).length} pagamentos</div></div>
-    <div class="glass stat"><div class="label">Último pagamento</div><div class="value" style="font-size:1.5rem">${ex[0] ? esc(ex[0].name) : '—'}</div><div class="sub">${ex[0] ? fmtDate(ex[0].paidDate) + ' · ' + brl(ex[0].amount) : 'nenhum ainda'}</div></div>
+  <div class="grid stats" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="glass stat glow"><div class="label">Total já pago</div><div class="value" style="color:var(--green)">${brl(sum(allPaid))}</div><div class="sub">${plural(allPaid.length, 'pagamento', 'pagamentos')}</div></div>
+    <div class="glass stat"><div class="label">Último pagamento</div><div class="value" style="font-size:1.5rem">${last ? esc(last.nome) : '—'}</div><div class="sub">${last ? fmtDate(last.data_pagamento) + ' · ' + brl(last.valor) : 'nenhum ainda'}</div></div>
   </div>
   <section class="glass panel" style="margin-top:16px">
-    <div class="section-head"><h2>Histórico de pagamentos</h2>${pills}</div>
+    <div class="section-head"><h2>Histórico de pagamentos</h2>${blockPills()}</div>
     ${body}
   </section>`;
+}
+
+function typeTag(e) {
+  if (e.tipo === 'parcelada') return `<span class="tag">Parcela ${e.parcela_num}/${e.parcela_total}</span>`;
+  if (e.tipo === 'fixa') return `<span class="tag">Fixa</span>`;
+  return '';
 }
 
 function list(items, showBlock, inner = false) {
   if (!items.length) return inner ? '' : `<div class="empty">Nada por aqui ainda ✨</div>`;
   return `<div class="list">${items.map(e => {
-    const b = blockById(e.blockId);
-    const over = isOverdue(e);
-    const status = e.paid ? `<span class="tag green">Pago em ${fmtDate(e.paidDate)}</span>`
-      : over ? `<span class="tag red">Vencida</span>` : '';
-    return `<div class="item ${e.paid ? 'paid' : ''}">
-      <button class="check" data-toggle="${e.id}" aria-label="${e.paid ? 'Desmarcar pago' : 'Marcar como pago'}">${e.paid ? SVG(I.check) : ''}</button>
+    const b = blockById(e.bloco_id);
+    const status = e.pago ? `<span class="tag green">Pago em ${fmtDate(e.data_pagamento)}</span>`
+      : isOverdue(e) ? `<span class="tag red">Vencida</span>` : '';
+    const who = membros[e.criado_por];
+    return `<div class="item ${e.pago ? 'paid' : ''}">
+      <button class="check" data-toggle="${e.id}" aria-label="${e.pago ? 'Desmarcar pago' : 'Marcar como pago'}">${e.pago ? SVG(I.check) : ''}</button>
       <div>
-        <div class="item-name">${esc(e.name)}</div>
-        <div class="item-sub">${showBlock && b ? `<span class="tag">${esc(b.name)}</span>` : ''}<span>Vence ${fmtDate(e.dueDate)}</span>${status}</div>
+        <div class="item-name">${esc(e.nome)}</div>
+        <div class="item-sub">${showBlock && b ? `<span class="tag">${esc(b.nome)}</span>` : ''}${typeTag(e)}<span>Vence ${fmtDate(e.vencimento)}</span>${status}${who && who !== me.nome ? `<span>· por ${esc(who)}</span>` : ''}</div>
       </div>
-      <div class="item-amount">${brl(e.amount)}</div>
+      <div class="item-amount">${brl(e.valor)}</div>
       <div class="item-actions">
-        ${e.paid ? '' : `<button class="btn btn-green btn-sm" data-pay="${e.id}">Já paguei</button>`}
+        ${e.pago ? '' : `<button class="btn btn-green btn-sm" data-pay="${e.id}">Já paguei</button>`}
         <button class="icon-btn" data-edit="${e.id}" aria-label="Editar">${SVG(I.edit)}</button>
         <button class="icon-btn" data-del="${e.id}" aria-label="Excluir">${SVG(I.trash)}</button>
       </div>
@@ -505,112 +619,69 @@ function list(items, showBlock, inner = false) {
   }).join('')}</div>`;
 }
 
-// ---------- Gráfico (SVG) ----------
-function chart() { return `<div class="chart-wrap" id="chartWrap"></div>`; }
-function drawChart() {
-  const wrap = $('#chartWrap'); if (!wrap) return;
-  const now = new Date();
-  const months = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    months.push({ key, label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
-      full: d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
-      v: sum(data.expenses.filter(e => e.paid && (e.paidDate || '').startsWith(key))) });
-  }
-  const W = Math.max(wrap.clientWidth, 280), H = 220, pl = 56, pr = 16, pt = 16, pb = 30;
-  const max = Math.max(...months.map(m => m.v), 100) * 1.15;
-  const x = i => pl + i * (W - pl - pr) / 11;
-  const y = v => pt + (1 - v / max) * (H - pt - pb);
-  const pts = months.map((m, i) => [x(i), y(m.v)]);
-  let d = `M${pts[0][0]},${pts[0][1]}`;
-  for (let i = 1; i < pts.length; i++) {
-    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2;
-    d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`;
-  }
-  const area = `${d} L${x(11)},${H - pb} L${x(0)},${H - pb} Z`;
-  const grid = [0, .25, .5, .75, 1].map(f => {
-    const v = max * f, yy = y(v);
-    const lbl = v >= 1000 ? (v / 1000).toFixed(1).replace('.0', '') + 'k' : Math.round(v);
-    return `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="#2c252d" stroke-dasharray="${f ? '3 5' : ''}"/><text x="${pl - 10}" y="${yy + 4}" text-anchor="end">${lbl}</text>`;
-  }).join('');
-  const step = W < 500 ? 2 : 1;
-  const labels = months.map((m, i) => i % step ? '' : `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" style="text-transform:capitalize">${m.label}</text>`).join('');
-  const hits = months.map((m, i) => `<rect x="${x(i) - (W - pl - pr) / 22}" y="0" width="${(W - pl - pr) / 11}" height="${H}" fill="transparent" stroke="none" data-i="${i}"/>`).join('');
-  window.__chart = { months, pts, W, H };
-  wrap.innerHTML = `
-    <svg class="chart" viewBox="0 0 ${W} ${H}" id="chartSvg">
-      <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3a9cf" stop-opacity=".35"/><stop offset="1" stop-color="#e3a9cf" stop-opacity="0"/></linearGradient></defs>
-      ${grid}${labels}
-      <path d="${area}" fill="url(#ga)"/>
-      <path d="${d}" stroke="#e3a9cf" stroke-width="2.5" fill="none"/>
-      <line id="chartLine" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="#e3a9cf" stroke-dasharray="4 4" opacity="0"/>
-      <circle id="chartDot" r="6" stroke-width="3" opacity="0"/>
-      ${hits}
-    </svg>
-    <div class="chart-tip hidden" id="chartTip"></div>`;
-  bindChart();
-}
-window.addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(drawChart, 150); });
-function bindChart() {
-  const svg = $('#chartSvg'); if (!svg) return;
-  const tip = $('#chartTip'), line = $('#chartLine'), dot = $('#chartDot'), c = window.__chart;
-  svg.querySelectorAll('rect[data-i]').forEach(r => {
-    const show = () => {
-      const i = +r.dataset.i, [px, py] = c.pts[i], m = c.months[i];
-      line.setAttribute('x1', px); line.setAttribute('x2', px); line.setAttribute('opacity', '.6');
-      dot.setAttribute('cx', px); dot.setAttribute('cy', py); dot.setAttribute('opacity', '1');
-      tip.style.left = Math.min(Math.max(px, 70), c.W - 70) + 'px';
-      tip.style.top = py + 'px';
-      tip.innerHTML = `<small>${m.full[0].toUpperCase() + m.full.slice(1)}</small>${brl(m.v)}`;
-      tip.classList.remove('hidden');
-    };
-    r.addEventListener('mouseenter', show); r.addEventListener('click', show);
-  });
-  svg.addEventListener('mouseleave', () => { tip.classList.add('hidden'); line.setAttribute('opacity', '0'); dot.setAttribute('opacity', '0'); });
-}
-
-// ---------- Eventos da view ----------
-function bindView() {
-  const v = $('#view');
-  v.querySelectorAll('[data-open-block]').forEach(el => {
+// ---------- Eventos ----------
+function bindView(root) {
+  const on = (sel, fn) => root.querySelectorAll(sel).forEach(el => el.addEventListener('click', ev => fn(el, ev)));
+  root.querySelectorAll('[data-open-block]').forEach(el => {
     el.addEventListener('click', () => go('block', el.dataset.openBlock));
     el.addEventListener('keydown', e => { if (e.key === 'Enter') go('block', el.dataset.openBlock); });
   });
-  v.querySelectorAll('[data-edit-block]').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); blockModal(el.dataset.editBlock); }));
-  v.querySelectorAll('[data-new-block]').forEach(el => el.addEventListener('click', () => blockModal(null)));
-  v.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => go(el.dataset.go)));
-  v.querySelectorAll('[data-filter]').forEach(el => el.addEventListener('click', () => { route.filter = el.dataset.filter; render(); }));
-  v.querySelectorAll('[data-add-in]').forEach(el => el.addEventListener('click', () => expenseModal(null, el.dataset.addIn)));
-  v.querySelectorAll('[data-pay]').forEach(el => el.addEventListener('click', () => payModal(el.dataset.pay)));
-  v.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => {
-    const e = data.expenses.find(x => x.id === el.dataset.toggle);
-    if (e.paid) { e.paid = false; e.paidDate = null; save(); render(); toast('Marcada como pendente'); }
+  on('[data-edit-block]', (el, ev) => { ev.stopPropagation(); blockModal(el.dataset.editBlock); });
+  on('[data-new-block]', () => blockModal(null));
+  on('[data-go]', el => go(el.dataset.go));
+  on('[data-filter]', el => { route.filter = el.dataset.filter; render(); });
+  on('[data-add-in]', el => expenseModal(null, { blockId: el.dataset.addIn }));
+  on('[data-pay]', el => payModal(el.dataset.pay));
+  on('[data-toggle]', el => {
+    const e = despById(el.dataset.toggle);
+    if (e.pago) mutate(() => db(sb.from('desp_despesas').update({ pago: false, data_pagamento: null }).eq('id', e.id)), 'Marcada como pendente');
     else payModal(e.id);
-  }));
-  v.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => expenseModal(el.dataset.edit)));
-  v.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
-    const e = data.expenses.find(x => x.id === el.dataset.del);
-    confirmModal(`Excluir "${esc(e.name)}"?`, 'Essa despesa será removida permanentemente.', () => {
-      data.expenses = data.expenses.filter(x => x.id !== e.id); save(); render(); toast('Despesa excluída');
-    });
-  }));
-  drawChart();
+  });
+  on('[data-edit]', el => expenseModal(el.dataset.edit));
+  on('[data-edit-fixa]', el => fixaModal(el.dataset.editFixa));
+  on('[data-del]', el => deleteModal(el.dataset.del));
+  on('[data-cal]', el => {
+    const k = +el.dataset.cal;
+    calMonth = k ? addMonths(calMonth, k, 1) : monthStart(todayISO());
+    render();
+  });
+  on('[data-day]', el => dayModal(el.dataset.day));
 }
 
 // ---------- Modais ----------
-function openModal(html) { $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden'); const f = $('#modalCard input'); if (f) setTimeout(() => f.focus(), 50); }
+function openModal(html, wide = false) {
+  $('#modalCard').className = 'modal-card glass' + (wide ? ' wide' : '');
+  $('#modalCard').innerHTML = html; $('#modal').classList.remove('hidden');
+  const f = $('#modalCard input:not([type=checkbox])'); if (f && !wide) setTimeout(() => f.focus(), 50);
+}
 function closeModal() { $('#modal').classList.add('hidden'); $('#modalCard').innerHTML = ''; }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+const bindClose = () => $('#modalCard').querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeModal));
+
+function dayModal(day) {
+  const items = data.despesas.filter(e => e.vencimento === day).sort((a, b) => (a.pago - b.pago) || a.nome.localeCompare(b.nome));
+  const label = cap(new Date(day + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }));
+  openModal(`
+    <h3>${label}</h3>
+    ${items.length ? `<p class="muted">Total ${brl(sum(items))} · pago ${brl(sum(items.filter(e => e.pago)))} · a pagar ${brl(sum(items.filter(e => !e.pago)))}</p>` : ''}
+    ${items.length ? list(items, true) : '<div class="empty" style="padding:24px">Nenhuma conta vence neste dia</div>'}
+    <div class="modal-actions">
+      <button class="btn" data-close>Fechar</button>
+      <button class="btn btn-primary" id="dayAdd">+ Lançar neste dia</button>
+    </div>`, true);
+  bindClose();
+  bindView($('#modalCard'));
+  $('#dayAdd').addEventListener('click', () => expenseModal(null, { due: day }));
+}
 
 function blockModal(id) {
-  const b = id ? blockById(id) : { name: '', icon: 'wallet' };
-  let icon = b.icon;
+  const b = id ? blockById(id) : { nome: '', icone: 'wallet' };
+  let icon = b.icone;
   openModal(`
     <h3>${id ? 'Editar bloco' : 'Novo bloco'}</h3>
     <form id="blockForm" style="display:flex;flex-direction:column;gap:14px">
-      <label>Nome do bloco<input id="bName" value="${esc(b.name)}" placeholder="Ex.: Cartão Nubank" required maxlength="40"></label>
+      <label>Nome do bloco<input id="bName" value="${esc(b.nome)}" placeholder="Ex.: Cartão Nubank" required maxlength="40"></label>
       <label>Ícone</label>
       <div class="icon-pick" id="iconPick">${Object.keys(ICONS).map(k => `<button type="button" data-icon="${k}" class="${k === icon ? 'active' : ''}">${SVG(ICONS[k])}</button>`).join('')}</div>
       <div class="modal-actions">
@@ -619,71 +690,181 @@ function blockModal(id) {
         <button class="btn btn-primary">Salvar</button>
       </div>
     </form>`);
+  bindClose();
   $('#iconPick').querySelectorAll('button').forEach(bt => bt.addEventListener('click', () => {
     icon = bt.dataset.icon; $('#iconPick').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === bt));
   }));
-  $('#modalCard [data-close]').addEventListener('click', closeModal);
   $('#blockForm').addEventListener('submit', e => {
     e.preventDefault();
-    const name = $('#bName').value.trim(); if (!name) return;
-    if (id) Object.assign(b, { name, icon });
-    else data.blocks.push({ id: uid(), name, icon });
-    save(); closeModal(); render(); toast(id ? 'Bloco atualizado' : 'Bloco criado');
+    const nome = $('#bName').value.trim(); if (!nome) return;
+    mutate(() => id ? db(sb.from('desp_blocos').update({ nome, icone: icon }).eq('id', id))
+                    : db(sb.from('desp_blocos').insert({ nome, icone: icon })), id ? 'Bloco atualizado' : 'Bloco criado');
   });
   if (id) $('#bDel').addEventListener('click', () => {
-    const n = expensesOf(id).length;
-    confirmModal(`Excluir o bloco "${esc(b.name)}"?`, n ? `As ${n} despesa(s) dentro dele também serão excluídas.` : 'O bloco está vazio.', () => {
-      data.blocks = data.blocks.filter(x => x.id !== id);
-      data.expenses = data.expenses.filter(x => x.blockId !== id);
-      save(); go('dashboard'); toast('Bloco excluído');
-    });
+    const n = expensesOf(id).length + data.fixas.filter(f => f.bloco_id === id).length;
+    confirmModal(`Excluir o bloco "${esc(b.nome)}"?`, n ? 'Todas as despesas e contas fixas dentro dele também serão excluídas.' : 'O bloco está vazio.', [
+      { label: 'Excluir', run: () => mutate(() => db(sb.from('desp_blocos').delete().eq('id', id)), 'Bloco excluído') }
+    ]);
   });
 }
 
-function expenseModal(id, blockId) {
-  if (!data.blocks.length) { toast('Crie um bloco primeiro'); blockModal(null); return; }
-  const e = id ? data.expenses.find(x => x.id === id)
-    : { name: '', amount: '', dueDate: todayISO(), blockId: blockId || data.blocks[0].id, paid: false, paidDate: '' };
+// Nova despesa: avulsa, fixa (todo mês) ou parcelada. Edição: altera só o lançamento escolhido.
+function expenseModal(id, opts = {}) {
+  if (!data.blocos.length) { toast('Crie um bloco primeiro'); blockModal(null); return; }
+  const e = id ? despById(id) : {
+    nome: '', valor: '', vencimento: opts.due || todayISO(), pago: false, data_pagamento: '',
+    bloco_id: opts.blockId || data.blocos[0].id, tipo: 'avulsa'
+  };
+  let tipo = e.tipo;
+  const blockSelect = `<label>Bloco<select id="eBlock">${data.blocos.map(b => `<option value="${b.id}" ${b.id === e.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>`;
   openModal(`
     <h3>${id ? 'Editar despesa' : 'Nova despesa'}</h3>
     <form id="expForm" style="display:flex;flex-direction:column;gap:14px">
-      <label>Nome da dívida<input id="eName" value="${esc(e.name)}" placeholder="Ex.: Conta de luz" required maxlength="60"></label>
+      ${id ? (e.tipo === 'parcelada' ? `<div class="hint">Parcela ${e.parcela_num} de ${e.parcela_total}</div>`
+             : e.tipo === 'fixa' && fixaById(e.fixa_id) ? `<div class="hint">Lançamento de uma conta fixa. Para mudar todos os meses, <a href="#" id="goFixa" class="accent">edite a conta fixa</a>.</div>` : '')
+           : `<div class="seg" id="tipoSeg">
+                <button type="button" data-t="avulsa" class="active">Única</button>
+                <button type="button" data-t="fixa">Fixa mensal</button>
+                <button type="button" data-t="parcelada">Parcelada</button>
+              </div>`}
+      <label>Nome da dívida<input id="eName" value="${esc(e.nome)}" placeholder="Ex.: Conta de luz" required maxlength="60"></label>
       <div class="row">
-        <label>Valor (R$)<input id="eAmount" type="number" inputmode="decimal" step="0.01" min="0" value="${e.amount}" placeholder="0,00" required></label>
-        <label>Vencimento<input id="eDue" type="date" value="${e.dueDate || ''}" required></label>
+        <label><span id="lblValor">Valor (R$)</span><input id="eAmount" type="number" inputmode="decimal" step="0.01" min="0" value="${e.valor}" placeholder="0,00" required></label>
+        <label><span id="lblDue">Vencimento</span><input id="eDue" type="date" value="${e.vencimento}" required></label>
       </div>
-      <label>Bloco<select id="eBlock">${data.blocks.map(b => `<option value="${b.id}" ${b.id === e.blockId ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
-      <label class="switch"><input type="checkbox" id="ePaid" ${e.paid ? 'checked' : ''}> Já paguei</label>
-      <label id="ePaidWrap" class="${e.paid ? '' : 'hidden'}">Data do pagamento<input id="ePaidDate" type="date" value="${e.paidDate || todayISO()}"></label>
+      <div id="parcBox" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+        <div class="row">
+          <label>Nº de parcelas<input id="eParc" type="number" min="2" max="120" step="1" value="2"></label>
+          <label>O valor digitado é<select id="eModo"><option value="parcela">Valor de cada parcela</option><option value="total">Valor total</option></select></label>
+        </div>
+        <label>Parcelas já pagas<input id="eJaPagas" type="number" min="0" max="119" step="1" value="0"></label>
+        <div class="hint" id="parcResumo"></div>
+      </div>
+      <div id="fixaBox" class="hint hidden">Vai ser lançada automaticamente todo mês no mesmo dia, a partir da data escolhida.</div>
+      ${blockSelect}
+      ${id && e.tipo === 'parcelada' ? `<label class="switch"><input type="checkbox" id="eAll"> Aplicar nome, valor e bloco às parcelas não pagas</label>` : ''}
+      <div id="paidBox">
+        <label class="switch"><input type="checkbox" id="ePaid" ${e.pago ? 'checked' : ''}> Já paguei</label>
+        <label id="ePaidWrap" class="${e.pago ? '' : 'hidden'}" style="margin-top:12px">Data do pagamento<input id="ePaidDate" type="date" value="${e.data_pagamento || todayISO()}"></label>
+      </div>
       <div class="modal-actions">
         <button type="button" class="btn" data-close>Cancelar</button>
         <button class="btn btn-primary">Salvar</button>
       </div>
     </form>`);
+  bindClose();
+  const goFixa = $('#goFixa'); if (goFixa) goFixa.addEventListener('click', ev => { ev.preventDefault(); fixaModal(e.fixa_id); });
+
+  const resumo = () => {
+    const n = Math.max(2, parseInt($('#eParc').value) || 2);
+    const v = parseFloat($('#eAmount').value) || 0;
+    const parcela = $('#eModo').value === 'total' ? v / n : v;
+    const ult = addMonths($('#eDue').value || todayISO(), n - 1);
+    $('#parcResumo').textContent = `${n}x de ${brl(parcela)} = ${brl(parcela * n)} · última em ${fmtDate(ult)}`;
+  };
+  const setTipo = t => {
+    tipo = t;
+    document.querySelectorAll('#tipoSeg button').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+    $('#parcBox').classList.toggle('hidden', !!id || t !== 'parcelada');
+    $('#fixaBox').classList.toggle('hidden', !!id || t !== 'fixa');
+    $('#paidBox').classList.toggle('hidden', t !== 'avulsa' && !id);
+    $('#lblValor').textContent = t === 'fixa' && !id ? 'Valor mensal (R$)' : 'Valor (R$)';
+    $('#lblDue').textContent = t === 'avulsa' || id ? 'Vencimento' : t === 'fixa' ? 'Primeiro vencimento' : '1ª parcela vence';
+    if (t === 'parcelada' && !id) resumo();
+  };
+  document.querySelectorAll('#tipoSeg button').forEach(b => b.addEventListener('click', () => setTipo(b.dataset.t)));
+  ['#eParc', '#eModo', '#eAmount', '#eDue'].forEach(s => $(s).addEventListener('input', () => tipo === 'parcelada' && !id && resumo()));
   $('#ePaid').addEventListener('change', ev => $('#ePaidWrap').classList.toggle('hidden', !ev.target.checked));
-  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  setTipo(tipo);
+
   $('#expForm').addEventListener('submit', ev => {
     ev.preventDefault();
-    const paid = $('#ePaid').checked;
-    const vals = {
-      name: $('#eName').value.trim(),
-      amount: Math.round(parseFloat($('#eAmount').value) * 100) / 100 || 0,
-      dueDate: $('#eDue').value,
-      blockId: $('#eBlock').value,
-      paid,
-      paidDate: paid ? ($('#ePaidDate').value || todayISO()) : null
-    };
-    if (id) Object.assign(e, vals);
-    else data.expenses.push({ id: uid(), createdAt: Date.now(), ...vals });
-    save(); closeModal(); render(); toast(id ? 'Despesa atualizada' : 'Despesa lançada');
+    const nome = $('#eName').value.trim();
+    const valor = Math.round((parseFloat($('#eAmount').value) || 0) * 100) / 100;
+    const due = $('#eDue').value, bloco_id = $('#eBlock').value;
+    const pago = $('#ePaid').checked, data_pagamento = pago ? ($('#ePaidDate').value || todayISO()) : null;
+
+    if (id) {
+      const applyAll = $('#eAll') && $('#eAll').checked;
+      return mutate(async () => {
+        await db(sb.from('desp_despesas').update({ nome, valor, vencimento: due, bloco_id, pago, data_pagamento }).eq('id', id));
+        if (applyAll) await db(sb.from('desp_despesas').update({ nome, valor, bloco_id }).eq('grupo_id', e.grupo_id).eq('pago', false));
+      }, 'Despesa atualizada');
+    }
+    if (tipo === 'avulsa') {
+      return mutate(() => db(sb.from('desp_despesas').insert({ nome, valor, vencimento: due, bloco_id, pago, data_pagamento, tipo })), 'Despesa lançada');
+    }
+    if (tipo === 'fixa') {
+      return mutate(() => db(sb.from('desp_fixas').insert({ nome, valor, bloco_id, dia_venc: +due.slice(8, 10), inicio: monthStart(due) })), 'Conta fixa criada');
+    }
+    // parcelada: divide o total em centavos (a diferença do arredondamento vai na 1ª parcela)
+    const n = Math.min(120, Math.max(2, parseInt($('#eParc').value) || 2));
+    const jaPagas = Math.min(n, Math.max(0, parseInt($('#eJaPagas').value) || 0));
+    const total = $('#eModo').value === 'total' ? cents(valor) : cents(valor) * n;
+    const base = Math.floor(total / n), resto = total - base * n;
+    const grupo_id = crypto.randomUUID ? crypto.randomUUID() : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ Math.random() * 16 >> c / 4).toString(16));
+    const day = +due.slice(8, 10);
+    const rows = Array.from({ length: n }, (_, i) => {
+      const venc = addMonths(due, i, day);
+      return { nome, bloco_id, tipo, grupo_id, parcela_num: i + 1, parcela_total: n,
+        valor: (base + (i === 0 ? resto : 0)) / 100, vencimento: venc,
+        pago: i < jaPagas, data_pagamento: i < jaPagas ? (venc < todayISO() ? venc : todayISO()) : null };
+    });
+    mutate(() => db(sb.from('desp_despesas').insert(rows)), `${n} parcelas lançadas`);
   });
 }
 
+function fixaModal(fid) {
+  const f = fixaById(fid);
+  const mesAtual = monthStart(todayISO());
+  openModal(`
+    <h3>Conta fixa</h3>
+    <p class="muted">As mudanças valem para os lançamentos ainda não pagos deste mês em diante.</p>
+    <form id="fixaForm" style="display:flex;flex-direction:column;gap:14px">
+      <label>Nome<input id="fName" value="${esc(f.nome)}" required maxlength="60"></label>
+      <div class="row">
+        <label>Valor mensal (R$)<input id="fValor" type="number" step="0.01" min="0" value="${f.valor}" required></label>
+        <label>Dia do vencimento<input id="fDia" type="number" min="1" max="31" value="${f.dia_venc}" required></label>
+      </div>
+      <label>Bloco<select id="fBlock">${data.blocos.map(b => `<option value="${b.id}" ${b.id === f.bloco_id ? 'selected' : ''}>${esc(b.nome)}</option>`).join('')}</select></label>
+      ${f.fim ? `<div class="hint">Encerrada: último mês ${fmtDate(f.fim).slice(3)}</div>` : ''}
+      <div class="modal-actions">
+        ${f.fim ? `<button type="button" class="btn" id="fReativar" style="margin-right:auto">Reativar</button>`
+                : `<button type="button" class="btn btn-danger" id="fEncerrar" style="margin-right:auto">Encerrar</button>`}
+        <button type="button" class="btn" data-close>Cancelar</button>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </form>`);
+  bindClose();
+  $('#fixaForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const nome = $('#fName').value.trim(), valor = Math.round(parseFloat($('#fValor').value) * 100) / 100 || 0;
+    const dia_venc = Math.min(31, Math.max(1, parseInt($('#fDia').value) || 1)), bloco_id = $('#fBlock').value;
+    mutate(async () => {
+      await db(sb.from('desp_fixas').update({ nome, valor, dia_venc, bloco_id }).eq('id', fid));
+      const futuros = data.despesas.filter(e => e.fixa_id === fid && !e.pago && e.mes_ref >= mesAtual);
+      await Promise.all(futuros.map(e => db(sb.from('desp_despesas')
+        .update({ nome, valor, bloco_id, vencimento: addMonths(e.mes_ref, 0, dia_venc) }).eq('id', e.id))));
+    }, 'Conta fixa atualizada');
+  });
+  const enc = $('#fEncerrar');
+  if (enc) enc.addEventListener('click', () => confirmModal(`Encerrar "${esc(f.nome)}"?`,
+    'Ela para de ser lançada nos próximos meses. O que já foi lançado continua no histórico.', [
+      { label: 'Encerrar', run: () => mutate(() => db(sb.from('desp_fixas').update({ fim: mesAtual }).eq('id', fid)), 'Conta fixa encerrada') },
+      { label: 'Excluir de vez', run: () => mutate(async () => {
+          await db(sb.from('desp_despesas').delete().eq('fixa_id', fid).eq('pago', false));
+          await db(sb.from('desp_fixas').delete().eq('id', fid));
+        }, 'Conta fixa excluída') }
+    ]));
+  const re = $('#fReativar');
+  if (re) re.addEventListener('click', () => mutate(() => db(sb.from('desp_fixas').update({ fim: null }).eq('id', fid)), 'Conta fixa reativada'));
+}
+
 function payModal(id) {
-  const e = data.expenses.find(x => x.id === id);
+  const e = despById(id);
   openModal(`
     <h3>Marcar como pago</h3>
-    <p class="muted">${esc(e.name)} · ${brl(e.amount)}</p>
+    <p class="muted">${esc(e.nome)} ${e.tipo === 'parcelada' ? `(${e.parcela_num}/${e.parcela_total})` : ''} · ${brl(e.valor)}</p>
     <form id="payForm" style="display:flex;flex-direction:column;gap:14px">
       <label>Data do pagamento<input id="pDate" type="date" value="${todayISO()}" required></label>
       <div class="modal-actions">
@@ -691,30 +872,49 @@ function payModal(id) {
         <button class="btn btn-green">${SVG(I.check)} Já paguei</button>
       </div>
     </form>`);
-  $('#modalCard [data-close]').addEventListener('click', closeModal);
+  bindClose();
   $('#payForm').addEventListener('submit', ev => {
     ev.preventDefault();
-    e.paid = true; e.paidDate = $('#pDate').value || todayISO();
-    save(); closeModal(); render(); toast('Pagamento registrado ✓');
+    mutate(() => db(sb.from('desp_despesas').update({ pago: true, data_pagamento: $('#pDate').value || todayISO() }).eq('id', id)), 'Pagamento registrado ✓');
   });
 }
 
-function confirmModal(title, text, onOk) {
+function deleteModal(id) {
+  const e = despById(id);
+  const del = (q, msg) => ({ label: msg, run: () => mutate(() => db(q), 'Excluído') });
+  const T = sb.from.bind(sb);
+  let opts;
+  if (e.tipo === 'parcelada') opts = [
+    del(T('desp_despesas').delete().eq('id', id), 'Só esta parcela'),
+    del(T('desp_despesas').delete().eq('grupo_id', e.grupo_id).eq('pago', false), 'Todas as não pagas'),
+    del(T('desp_despesas').delete().eq('grupo_id', e.grupo_id), 'Todas as parcelas')
+  ];
+  else if (e.tipo === 'fixa' && fixaById(e.fixa_id) && !fixaById(e.fixa_id).fim) opts = [
+    del(T('desp_despesas').delete().eq('id', id), 'Só este mês'),
+    { label: 'Este mês e encerrar a conta fixa', run: () => mutate(async () => {
+        await db(sb.from('desp_despesas').delete().eq('id', id));
+        await db(sb.from('desp_fixas').update({ fim: addMonths(e.mes_ref, -1, 1) }).eq('id', e.fixa_id));
+      }, 'Conta fixa encerrada') }
+  ];
+  else opts = [del(T('desp_despesas').delete().eq('id', id), 'Excluir')];
+  confirmModal(`Excluir "${esc(e.nome)}"?`, 'Essa ação não pode ser desfeita.', opts);
+}
+
+function confirmModal(title, text, actions) {
   openModal(`<h3>${title}</h3><p class="muted">${text}</p>
-    <div class="modal-actions"><button class="btn" data-close>Cancelar</button><button class="btn btn-danger" id="cOk">Excluir</button></div>`);
-  $('#modalCard [data-close]').addEventListener('click', closeModal);
-  $('#cOk').addEventListener('click', () => { closeModal(); onOk(); });
+    <div class="modal-actions">${actions.map((a, i) => `<button class="btn btn-danger" data-act="${i}">${a.label}</button>`).join('')}<button class="btn" data-close>Cancelar</button></div>`);
+  bindClose();
+  $('#modalCard').querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => actions[+b.dataset.act].run()));
 }
 
 let toastT;
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2200);
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 2600);
 }
 
 // ---------- Início ----------
-const saved = store.get('despesas_session', null);
-if (saved && USERS[saved]) { user = saved; startApp(); } else showLogin();
+sb.auth.getSession().then(({ data: { session } }) => session ? startApp(session.user) : showLogin());
 </script>
 </body>
 </html>
